@@ -174,4 +174,9 @@ char static_tolower_string[100];
 char *static_tolowern(char *string, size_t n);
 char *static_tolower(char *string);
 
+unsigned char *geninquotes_html(char *html, size_t len);
+
+void print_element_path_nonewline(struct html_element *html);
+void print_element_path(struct html_element *html);
+void test_print_structure(struct html_element *html);
 void print_html_structure(struct html_element *html);

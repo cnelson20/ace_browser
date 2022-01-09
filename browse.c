@@ -196,6 +196,29 @@ void print_html_structure(struct html_element *html) {
 	}
 }
 
+void print_element_path_nonewline(struct html_element *html) {
+	if (html->parent == NULL) {
+		printf("%s",html_element_index_names[html->tag]);
+	} else {
+		print_element_path_nonewline(html->parent);
+		printf(".%s",html_element_index_names[html->tag]);
+	}
+}
+void print_element_path(struct html_element *html) {
+	print_element_path_nonewline(html);
+	putchar('\n');
+}
+
+void test_print_structure(struct html_element *html) {
+	print_element_path(html);
+	if (html->num_children != 0) {
+		int i;		
+		for (i = 0; i < html->num_children; i++) {
+			test_print_structure(html->children[i]);
+		}
+	}
+}
+
 int min(int a, int b) {
 	return (a < b ? a : b);
 }
@@ -293,7 +316,7 @@ int main(int argc, char *argv[]) {
 	}
 	if (!strcmp(static_tolower_string,"html")) {
 		html = calloc(1,sizeof(struct html_element));
-		printf("cur: '%s'\n",cur);
+		//printf("cur: '%s'\n",cur);
 		init_html_element(html,NULL,cur+1,strchr(cur+1,'>') - (cur+1));
 		html->innertext = malloc(32);
 		html->innertext[0] = '\0';
@@ -301,10 +324,12 @@ int main(int argc, char *argv[]) {
 		html->innertext_length = 0;
 		
 		elem = html;
+		/*
 		printf("------------------------\n");
 		printf("Element: Tag: (%d) %s\n",elem->tag,html_element_index_names[elem->tag]);
 		printf("Properties: '%s'\n",elem->properties);
 		printf("------------------------\n");
+		*/
 		
 		cur = strchr(cur,'>');
 		while (qts[cur - file]) {
@@ -314,7 +339,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	while (elem != NULL && cur < file + strlen(file)) {
-		//printf("curr: %c%c%c%c\n",*cur,*(cur+1),*(cur+2),*(cur+3));
 		if (*cur == '<') {
 			if (*(cur+1) != '/') {
 				/* new element */
@@ -341,12 +365,12 @@ int main(int argc, char *argv[]) {
 					elem->innertext_size = 32;
 					elem->innertext_length = 0;
 				}
-					
+				/*
 				printf("------------------------\n");
 				printf("Element: Tag: (%d) %s\n",elem->tag,html_element_index_names[elem->tag]);
-				//printf("Parent: '%s'\n",html_element_index_names[elem->parent->tag]);
 				printf("Properties: '%s'\n",elem->properties);
 				printf("------------------------\n");
+				*/
 				
 				
 				cur = strchr(cur,'>');
@@ -381,6 +405,11 @@ int main(int argc, char *argv[]) {
 	free(file);
 	free(qts);
 	
-	printf("ELEMENT_BR: %d\tget_html_element_index(\"br\"): %d\n",ELEMENT_BR,get_html_element_index("br"));
+	
+	// I don't think this code fully works 
+	// bark.grixisutils.site is what im using to test now, doesnt work right 
+	// I dont mean the print function, i mean the above code // Now commenting the comment, turns out I am simply retarded 
+	printf("\n------------------------\n");
+	test_print_structure(html);
 	return 0;
 }
