@@ -12,7 +12,7 @@
 #define ELEMENT_TITLE 6
 
 /* Sectioning root */
-#define ELEMENT_BODY 7;
+#define ELEMENT_BODY 7
 
 /* Content sectioning */
 #define ELEMENT_ADDRESS 8
@@ -150,6 +150,8 @@
 
 #define ISVOIDELEMENT(x) (x == ELEMENT_AREA || x == ELEMENT_BASE || x == ELEMENT_BR || x == ELEMENT_COL || x == ELEMENT_EMBED || x == ELEMENT_HR || x == ELEMENT_IMG || x == ELEMENT_INPUT || x == ELEMENT_LINK || x == ELEMENT_META || x == ELEMENT_PARAM || x == ELEMENT_SOURCE || x == ELEMENT_TRACK || x == ELEMENT_WBR)
 
+#define DONTPRINT(x) (x ==  ELEMENT_HEAD || x == ELEMENT_SCRIPT || x == ELEMENT_STYLE)
+
 struct html_element {
 	struct html_element *parent;
 	struct html_element **children;
@@ -179,4 +181,4 @@ unsigned char *geninquotes_html(char *html, size_t len);
 void print_element_path_nonewline(struct html_element *html);
 void print_element_path(struct html_element *html);
 void test_print_structure(struct html_element *html);
-void print_html_structure(struct html_element *html);
+void print_html_structure(struct html_element *html, unsigned char rec);

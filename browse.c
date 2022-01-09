@@ -136,6 +136,12 @@ char html_element_index_names[][16] = {
 "noframes" // 112
 };
 
+char *file;
+
+/* 
+	Given a string of the tag name,
+	return an int corresponding to the tag
+*/
 int get_html_element_index(char *name) {
 	int i;
 	for (i = 0; i < sizeof(html_element_index_names) / sizeof(html_element_index_names[0]); i++) {
@@ -148,7 +154,7 @@ int get_html_element_index(char *name) {
 
 /* 
 	Init an html element 
-	Note: does not setup inner_text field,
+	Note: does not setup innertext field,
 */
 int init_html_element(struct html_element *html, struct html_element *f_parent, char *def, size_t def_length) {
 	printf("start init\n");
@@ -178,7 +184,10 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 	return 0;
 }
 
-void print_html_structure(struct html_element *html) {
+/* 
+	Recursively prints out data of a html tree
+*/
+void print_html_structure(struct html_element *html, unsigned char rec) {
 	printf("------------------------\n");
 	printf("Element: Tag: (%d) %s\n",html->tag,html_element_index_names[html->tag]);
 	printf("Properties: '%s'\n",html->properties);
@@ -191,11 +200,19 @@ void print_html_structure(struct html_element *html) {
 		int i;		
 		printf("Children (%d):\n",html->num_children);
 		for (i = 0; i < html->num_children; i++) {
-			print_html_structure(html->children[i]);
+			if (rec) {
+				print_html_structure(html->children[i],1);
+			} else {
+				printf("%s\n",html_element_index_names[html->children[i]->tag]);
+			}
 		}
 	}
 }
 
+/* 
+	Prints the path of a specific html element
+	ex: "html.body.div.div.img"
+*/
 void print_element_path_nonewline(struct html_element *html) {
 	if (html->parent == NULL) {
 		printf("%s",html_element_index_names[html->tag]);
@@ -204,11 +221,19 @@ void print_element_path_nonewline(struct html_element *html) {
 		printf(".%s",html_element_index_names[html->tag]);
 	}
 }
+
+/* 
+	Calls above function, adds newline 
+*/
 void print_element_path(struct html_element *html) {
 	print_element_path_nonewline(html);
 	putchar('\n');
 }
 
+/*
+	Calls print_element_path for each element in a tree,
+	recursively if rec = 1
+*/
 void test_print_structure(struct html_element *html) {
 	print_element_path(html);
 	if (html->num_children != 0) {
@@ -219,19 +244,61 @@ void test_print_structure(struct html_element *html) {
 	}
 }
 
+
+/* Kinda renders the html dir structure */
+void render_page(struct html_element *html, struct html_element *body) {
+	char *s = body->innertext;
+	int i = 0;
+	//print_html_structure(body,0);
+	
+	if (!DONTPRINT(body->tag)) {
+		while (*s) {
+			if (*s == 127) {
+				if (ISBLOCKLEVEL(body->children[i]->tag)) {
+					putchar('\n');
+					render_page(html,body->children[i]);
+					i++;
+					putchar('\n');
+				} else {
+					render_page(html,body->children[i]);
+					i++;
+				}
+			} else {
+				putchar(*s);
+			}
+			s++;
+		}
+	}
+}
+
+/* 
+	returns the minimum of two ints
+*/
 int min(int a, int b) {
 	return (a < b ? a : b);
 }
+
+/*
+	returns the lesser pointer that is not null
+*/
 void *minpointer_nnull(void *a, void *b) {
 	if (!a) { return b; }
 	if (!b) { return a; }
 	
 	return (a < b ? a : b);
 }
+
+/*
+	Returns whether is an char is considered whitespace
+*/
 int is_whitespace_char(int c) {
 	return c == 0xa || c == 0xc || c == 0xd || c == 0x20;
 }
 
+/* 
+	Copies n bytes of string to static_tolower_string (+ a null byte),
+	then converts it to lowercase
+*/
 char static_tolower_string[100];
 char *static_tolowern(char *string, size_t n) {
 	char *t;
@@ -248,10 +315,17 @@ char *static_tolowern(char *string, size_t n) {
 	
 	return static_tolower_string;
 }
+/* 
+	Calls static_tolowern with n as strlen(string) + 1
+*/
 char *static_tolower(char *string) {
 	return static_tolowern(string,strlen(string)+1);
 }
 
+/*
+	Generates a unsigned char[] of size len with 
+	whether each byte of html is in quotes
+*/
 unsigned char *geninquotes_html(char *html, size_t len) {
 	int i, inbrackets, inquotes;
 	char quotetype;
@@ -280,7 +354,21 @@ unsigned char *geninquotes_html(char *html, size_t len) {
 	return quotes;
 }
 
-char *file;
+/*
+	Given a int representing a html element tag,
+	return a string of a default innerhtml
+	ex: get_default_innerhtml(ELEMENT_BR) -> "\n"
+*/
+char *get_default_innerhtml(int tag) {
+	switch (tag) {
+		case ELEMENT_BR:
+			return (char *)"\n";
+		case ELEMENT_HR:
+			return (char *)"------------------------\n";
+		default:
+			return NULL;
+	}
+}
 
 int main(int argc, char *argv[]) {
 	/*
@@ -356,9 +444,17 @@ int main(int argc, char *argv[]) {
 				elem = elem->children[elem->num_children++];
 				
 				if (ISVOIDELEMENT(elem->tag)) {
-					elem->innertext = NULL;
-					elem->innertext_size = 0;
-					elem->innertext_length = 0;
+					char *t = get_default_innerhtml(elem->tag);
+					if (t != NULL) {
+						elem->innertext_size = strlen(t)+1;
+						elem->innertext = malloc(elem->innertext_size);
+						elem->innertext_length = elem->innertext_size - 1;
+						strcpy(elem->innertext,t);
+					} else {
+						elem->innertext = NULL;
+						elem->innertext_size = 0;
+						elem->innertext_length = 0;
+					}
 				} else {
 					elem->innertext = malloc(32);
 					elem->innertext[0] = '\0';
@@ -383,6 +479,9 @@ int main(int argc, char *argv[]) {
 				cur++;
 			} else {
 				/* closing tag */
+				if (elem->innertext_length > 0 && is_whitespace_char(elem->innertext[elem->innertext_length-1])) {
+					elem->innertext[--elem->innertext_length] = '\0';	
+				}
 				elem = elem->parent;
 				cur = strchr(cur,'>')+1;
 			}		
@@ -391,8 +490,13 @@ int main(int argc, char *argv[]) {
 				if (elem->innertext_length >= elem->innertext_size - 1) {
 					elem->innertext = realloc(elem->innertext, elem->innertext_size * 2);
 					elem->innertext_size *= 2;
-				}	
-				elem->innertext[(elem->innertext_length)++] = *(cur++);
+				}
+				if (*cur == '\n' || *cur == '\r') {
+					elem->innertext[(elem->innertext_length)++] = ' ';
+					cur++;
+				} else {
+					elem->innertext[(elem->innertext_length)++] = *(cur++);
+				}
 				elem->innertext[elem->innertext_length] = '\0';
 			} else {
 			  cur++;	
@@ -400,16 +504,16 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	
-	print_html_structure(html);
+	print_html_structure(html,1);
 	
+	printf("\n------------------------\n");
+	test_print_structure(html);
+	printf("------------------------\n");		
+	
+	render_page(html,html);
+
 	free(file);
 	free(qts);
 	
-	
-	// I don't think this code fully works 
-	// bark.grixisutils.site is what im using to test now, doesnt work right 
-	// I dont mean the print function, i mean the above code // Now commenting the comment, turns out I am simply retarded 
-	printf("\n------------------------\n");
-	test_print_structure(html);
 	return 0;
 }
