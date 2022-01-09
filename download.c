@@ -178,8 +178,8 @@ int main(int argc, char *argv[]) {
 			strcpy(port,strchr(site,':'));
 			site = realloc(site,strlen(path)+1);
 		} else {
-			port = malloc(sizeof("http"));
-			strcpy(port,"http");
+			port = malloc(sizeof("80"));
+			strcpy(port,"80");
 		}
 		path = malloc(strlen(strchr(argv[1],'/'))+1);
 		strcpy(path,strchr(argv[1],'/'));
@@ -192,8 +192,8 @@ int main(int argc, char *argv[]) {
 			port = malloc(strlen(strchr(argv[1],':'))+1);
 			strcpy(port,strchr(argv[1],':')+1);
 		} else { 			
-			port = malloc(sizeof("http"));
-			strcpy(port,"http");
+			port = malloc(sizeof("80"));
+			strcpy(port,"80");
 		}
 		path = malloc(2);
 		strcpy(path,"/");
@@ -219,8 +219,11 @@ int main(int argc, char *argv[]) {
 	for (i = 0; request_headers[i]; i++) {
 		free(request_headers[i]);
 	}
-	free(request_headers);
-	close(sd);
+	free(request_headers);	
 	free(site);
 	free(path);
+	free(port);
+
+	close(sd);
+
 }
