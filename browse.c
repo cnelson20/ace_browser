@@ -7,131 +7,133 @@
 #include <sys/stat.h>
 
 char html_element_index_names[][16] = {
-"html",
-"base",
-"head",
-"link",
-"meta",
-"style",
-"title",	
+"html",  // 0
 
-"body",
+"base",  // 1
+"head",  // 2
+"link",  // 3
+"meta",  // 4
+"style",  // 5
+"title",  //  6
+ 
+"body",  // 7
+ 
+"address",  // 8
+"article",  // 9
+"aside",  // 10
+"footer",  // 11
+"header", // 12
+"h1",  // 13
+"h2",  // 14
+"h3",  // 15
+"h4",  // 16
+"h5",  // 17
+"h6",  // 18
+"main",  // 19
+"nav",  // 20
+"section",  // 21
+ 
+"blockquote",  // 22
+"dd",  // 23
+"div",  // 24
+"dl",  // 25
+"dt",  // 26
+"figcaption",  // 27
+"figure",  // 28
+"hr",  // 29
+"li",  // 30
+"ol",  // 31
+"p",  // 32
+"pre",  // 33
+"ul",  // 34
+ 
+"a",  // 35
+"abbr",  // 36
+"b",  // 37 
+"bdi",  // 38
+"bdo",  // 39
+"br",  // 40
+"cite",  // 41
+"code",  // 42
+"data",  // 43
+"dfn",  // 44
+"em",  // 45
+"i",  // 46
+"kbd",  // 47
+"mark",  // 48
+"q",  // 49
+"rp",  // 50
+"rt",  // 51
+"ruby",  // 52
+"s",  // 53
+"samp",  // 54 
+"small",  // 55
+"span",  // 56
+"strong",  // 57
+"sub",  // 58
+"sup",  // 59
+"time",  // 60
+"u",  // 61
+"var",  // 62
+"wbr",  // 63
+ 
+"area",  // 64
+"audio",  // 65
+"img",  // 66
+"map",  // 67
+"track",  // 68
+"video",  // 69
+ 
+"embed",  // 70
+"iframe",  // 71
+"object",  // 72
+"param",  // 73
+"picture",  // 74
+"portal",  // 75
+"source",  // 76
+ 
+"svg",  // 77
+"math",  // 78
+ 
+"canvas",  // 79
+"noscript",  // 80
+"script",  // 81
+ 
+"del",  // 82
+"ins",  // 83
+ 
+"caption",  // 84
+"col"  // 85
+"colgroup",  // 86
+"table",  // 87
+"tbody",  // 88
+"td",  // 89
+"tfoot",  // 90 
+"th",  // 91
+"thead",  // 92 
+"tr", // 93
 
-"address",
-"article",
-"aside",
-"footer",
-"h1",
-"h2",
-"h3",
-"h4",
-"h5",
-"h6",
-"main",
-"nav",
-"section",
+"button", // 94
+"datalist",  // 95
+"fieldset",  // 96
+"form",  // 97
+"input",  // 98
+"label",  // 99
+"legend",  // 100
+"meter",  // 101
+"optgroup",  // 102
+"option",  // 103
+"output",  // 104
+"progress", // 105
+"select", // 106
+"textarea", // 107
 
-"blockquote",
-"dd",
-"div",
-"dl",
-"dt",
-"figcaption",
-"figure",
-"hr",
-"li",
-"ol",
-"p",
-"pre",
-"ul",
+"details", // 108 
+"dialog", // 109
+"menu", // 110
+"summary", // 111
 
-"a",
-"abbr",
-"b",
-"bdi",
-"bdo",
-"br",
-"cite",
-"code",
-"data",
-"dfn",
-"em",
-"i",
-"kbd",
-"mark",
-"q",
-"rp",
-"rt",
-"ruby",
-"s",
-"samp",
-"small",
-"span",
-"strong",
-"sub",
-"sup",
-"time",
-"u",
-"var",
-"wbr",
-
-"area",
-"audio",
-"img",
-"map",
-"track",
-"video",
-
-"embed",
-"iframe",
-"object",
-"param",
-"picture",
-"portal",
-"source",
-
-"svg",
-"math",
-
-"canvas",
-"noscript",
-"script",
-
-"del",
-"ins",
-
-"caption",
-"col"
-"colgroup",
-"table",
-"tbody",
-"td",
-"tfoot",
-"th",
-"thead",
-"tr",
-
-"button",
-"datalist",
-"fieldset",
-"form",
-"input",
-"label",
-"legend",
-"meter",
-"optgroup",
-"option",
-"output",
-"progress",
-"select",
-"textarea",
-
-"details",
-"dialog",
-"menu",
-"summary",
-
-"noframes"
+"noframes" // 112
 };
 
 int get_html_element_index(char *name) {
@@ -227,75 +229,35 @@ char *static_tolower(char *string) {
 	return static_tolowern(string,strlen(string)+1);
 }
 
-//char file[] = " <html> <head> <title> Test </title> </head> <body style=\"text-decoration:underline\"> Hello World! </body> </html>"; 
-/*char file[] = "<html>\
-    <head>\
-        <style>\
-            .whitetext {\
-                color:white;\
-            }   \
-            body {\
-                background-color:black;\
-                display:flex;\
-                flex-direction:row;\
-                align-items:stretch;\
-                position:fixed;\
-                padding:0;\
-                margin:0;\
-                left:0;\
-                width:100%;\
-                top:0;\
-                height:100%;\
-            }\
-            .sidebar {\
-                background-color:#606060;\
-            }\
-            .vertical-flex {\
-                display:flex;\
-                flex-direction:column;   \
-                flex-grow:1;\
-            }\
-            .padding-2 {\
-                padding-left:2%;\
-                padding-top:2%;\
-            }\
-            .underline {\
-                text-decoration:underline;\
-            }\
-            a {\
-                color:#72bdd4;\
-            }\
-        </style>\
-        <title> grixisutils home </title>\
-    </head>\
-    <body>\
-        <div class=\"sidebar whitetext\">\
-            <div style=\"padding-left:5%;padding-top:5%;\">\
-                <span class=\"underline\"> Utilities </span>\
-                <br>\
-                <a href=\"mtgoextrabuilder/\"> MTGO extras binder builder </a>\
-                <br>\
-                <a href=\"aocmirror/\"> Advent of Code Mirror </a>\
-                <br>\
-                <a href=\"dw_slides_backup/\"> Backup of Systems slides </a>\
-                <br>\
-                <br>\
-                <span class=\"underline\"> Subdomains </span>\
-                <br>\
-                <a href=\"https://www.bark.grixisutils.site\"> bark </a>\
-                <br>\
-                <a href=\"https://www.ovs.grixisutils.site\"> ovstutor </a>\
-            </div>\
-        </div>\
-        <div class=\"vertical-flex\">\
-            <div class=\"padding-2\">\
-                <div class=\"whitetext\"> Hello! </div>\
-            </div>\
-        </div>\
-    </body>\
-</html>";
-*/
-char file[10000];
+unsigned char *geninquotes_html(char *html, size_t len) {
+	int i, inbrackets, inquotes;
+	char quotetype;
+	unsigned char *quotes = malloc(len);
+	
+	inbrackets = 0;
+	inquotes = 0;
+	for (i = 0; i < len; i++) {
+		if (inbrackets) {
+			if (inquotes) {
+				if (html[i] == quotetype) {
+					inquotes = 0;
+				}
+			} else if (html[i] == '"' || html[i] == '\'') {
+				inquotes = 1;
+				quotetype = html[i];
+			} else if (html[i] == '>') {
+				inbrackets = 0;
+			}
+		} else if (!inquotes && html[i] == '<') {
+			inbrackets = 1;
+		}
+		quotes[i] = inquotes;
+	}
+	
+	return quotes;
+}
+
+char *file;
 
 int main(int argc, char *argv[]) {
 	/*
@@ -310,19 +272,25 @@ int main(int argc, char *argv[]) {
 	stat(argv[1],&fileinfo);
 	int fd = open(argv[1], O_RDONLY);
 	if (fd == -1) {printf("fuck\n");}
-	char *temp = malloc(fileinfo.st_size+1);
-	read(fd,temp,fileinfo.st_size);
-	temp[fileinfo.st_size] = '\0';
+	file = malloc(fileinfo.st_size+1);
+	read(fd,file,fileinfo.st_size);
 	close(fd);
-	memcpy(file,temp,fileinfo.st_size);
 	
-	char *cur;
+	char *qts = geninquotes_html(file,strlen(file));
+	char *cur = file;
+	
 	struct html_element *html = NULL;
 	struct html_element *elem = NULL;
 	
-	cur = strchr(file,'<');
-	static_tolowern(cur+1,4);
-	printf("%s\n",static_tolower_string);
+	while (1) {
+		cur = strchr(cur,'<');	
+		static_tolowern(cur+1,4);
+		if (!strcmp(static_tolower_string,"html")) {
+			break;
+		} else {
+			cur++;
+		}
+	}
 	if (!strcmp(static_tolower_string,"html")) {
 		html = calloc(1,sizeof(struct html_element));
 		printf("cur: '%s'\n",cur);
@@ -338,32 +306,57 @@ int main(int argc, char *argv[]) {
 		printf("Properties: '%s'\n",elem->properties);
 		printf("------------------------\n");
 		
-		cur = strchr(cur,'>')+1;
+		cur = strchr(cur,'>');
+		while (qts[cur - file]) {
+			cur = strchr(cur+1,'>');
+		}
+		cur++;
 	}
 	
 	while (elem != NULL && cur < file + strlen(file)) {
-		printf("curr: %c%c%c%c\n",*cur,*(cur+1),*(cur+2),*(cur+3));
+		//printf("curr: %c%c%c%c\n",*cur,*(cur+1),*(cur+2),*(cur+3));
 		if (*cur == '<') {
 			if (*(cur+1) != '/') {
 				/* new element */
+				if (elem->innertext_length >= elem->innertext_size - 1) {
+					elem->innertext = realloc(elem->innertext, elem->innertext_size * 2);
+					elem->innertext_size *= 2;
+				}	
+				elem->innertext[(elem->innertext_length)++] = 127;
+				elem->innertext[elem->innertext_length] = '\0';				
+				
 				elem->children = realloc(elem->children, (1+elem->num_children) * sizeof(struct html_element *));
 				elem->children[elem->num_children] = calloc(1,sizeof(struct html_element));
 				
 				init_html_element(elem->children[elem->num_children],elem,cur+1,strchr(cur+1,'>') - (cur+1));
 				elem = elem->children[elem->num_children++];
 				
-				elem->innertext = malloc(32);
-				elem->innertext[0] = '\0';
-				elem->innertext_size = 32;
-				elem->innertext_length = 0;
+				if (ISVOIDELEMENT(elem->tag)) {
+					elem->innertext = NULL;
+					elem->innertext_size = 0;
+					elem->innertext_length = 0;
+				} else {
+					elem->innertext = malloc(32);
+					elem->innertext[0] = '\0';
+					elem->innertext_size = 32;
+					elem->innertext_length = 0;
+				}
 					
 				printf("------------------------\n");
 				printf("Element: Tag: (%d) %s\n",elem->tag,html_element_index_names[elem->tag]);
+				//printf("Parent: '%s'\n",html_element_index_names[elem->parent->tag]);
 				printf("Properties: '%s'\n",elem->properties);
 				printf("------------------------\n");
 				
 				
-				cur = strchr(cur,'>')+1;
+				cur = strchr(cur,'>');
+				while (qts[cur - file]) {
+					cur = strchr(cur+1,'>');
+				}
+				if (ISVOIDELEMENT(elem->tag)) {
+					elem = elem->parent;
+				}
+				cur++;
 			} else {
 				/* closing tag */
 				elem = elem->parent;
@@ -385,6 +378,9 @@ int main(int argc, char *argv[]) {
 	
 	print_html_structure(html);
 	
-	//free(file);
+	free(file);
+	free(qts);
+	
+	printf("ELEMENT_BR: %d\tget_html_element_index(\"br\"): %d\n",ELEMENT_BR,get_html_element_index("br"));
 	return 0;
 }
