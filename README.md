@@ -1,7 +1,7 @@
 # ace_browser
 
-Cameron Nelson, Eric Guo, Adnan Quayyum
-Pd 5
+#### Cameron Nelson, Eric Guo, Adnan Quayyum  
+#### Pd 5
 
 In terminal text-based web browser.
 
