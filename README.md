@@ -3,16 +3,13 @@
 #### Cameron Nelson, Eric Guo, Adnan Quayyum  
 #### Pd 5
 
-### About
-#### Synopsis
+## About
+### Synopsis
 In terminal text-based web browser.
 
-#### Features (hopefully)
-
-Systems Elements:
-network - obvious
-files - browser can open files locally and uses them store downloaded webpages temporarily.
-metadata as well - stat
+### UI
+The user will be able to move around / scroll the webpage using terminal cursor and the arrow keys (we'll probably use ncurses).    
+They can navigate around the web by 'clicking' (actually by pressing enter) on links or by pressing buttons on html forms.  
 
 ### Data Structures:
 #### struct html_element - holds data about html element
