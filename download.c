@@ -142,7 +142,7 @@ void get(int sd, char *path, char *filepath, char **request_headers) {
 			*/
 			
 			chtml += chunk_length;
-			if (!strstr(chtml,"\r\n\r\n")) {
+			if (!strstr(chtml,"\r\n")) {
 				printf("chtml: \"%s\"\n",chtml);
 				printf("Reading again:\n");
 				printf("read(%d,%p,%ld)\n",sd,chtml,sizeof(response) - strlen(html));
