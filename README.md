@@ -3,7 +3,11 @@
 #### Cameron Nelson, Eric Guo, Adnan Quayyum  
 #### Pd 5
 
+### About
+#### Synopsis
 In terminal text-based web browser.
+
+#### Features (hopefully)
 
 Systems Elements:
 network - obvious
