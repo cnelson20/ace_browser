@@ -14,6 +14,8 @@ The user can also just type the url of the page they want to access.
 
 ### Responsibilities:
 - Cameron: HTML && CSS Parsing
+- Adnan: Terminal UI
+- Eric: Downloading Webpages
 
 ### Data Structures:
 #### struct html_element - holds data about html element
