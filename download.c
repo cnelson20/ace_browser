@@ -112,7 +112,6 @@ void get(int sd, char *path, char *filepath, char **request_headers) {
 		chunked = 1; // If content_length_undefined
 		char *chtml = html;
 		while (1) {
-			printf("html: %s\n",html);
 			*strchr(chtml,'\r') = '\0';
 			printf("c: '%s'\n",chtml);
 			if (!sscanf(chtml,"%x",&chunk_length)) {break;} 
@@ -143,10 +142,10 @@ void get(int sd, char *path, char *filepath, char **request_headers) {
 			*/
 			
 			chtml += chunk_length;
-			if (!strstr(chtml,"\r\n")) {
+			if (!strstr(chtml,"\r\n\r\n")) {
 				printf("chtml: \"%s\"\n",chtml);
 				printf("Reading again:\n");
-				printf("read(%d,%p,%d)\n",sd,chtml,sizeof(response) - strlen(html));
+				printf("read(%d,%p,%ld)\n",sd,chtml,sizeof(response) - strlen(html));
 				read(sd,chtml,sizeof(response) - strlen(html));
 				printf("Copying past \\r\\n\n");
 			}
