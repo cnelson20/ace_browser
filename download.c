@@ -114,7 +114,7 @@ void get(int sd, char *path, char *filepath, char **request_headers) {
 		while (1) {
 			*strchr(chtml,'\r') = '\0';
 			printf("c: '%s'\n",chtml);
-			sscanf(chtml,"%x",&chunk_length);
+			if (!sscanf(chtml,"%x",&chunk_length)) {break;} 
 			strcpy(chtml,strchr(chtml,'\0')+2);
 		
 			printf("________________\n");
