@@ -130,9 +130,25 @@ void get(int sd, char *path, char *filepath, char **request_headers) {
 			
 			printf("________________\n");
 			printf("%s\n",chtml);
+			printf("________________\n");
+			/*
+			int i;
+			for (i = 0; i < chunk_length; i++) {
+				if (chunk_length < 256) { putchar('0'); }
+				if (chunk_length < 16) { putchar('0'); }
+				printf("%x_'%c'  ",i,chtml[i]);
+			}
+			putchar('\n');
+			*/
 			
 			chtml += chunk_length;
-			read(sd,chtml,sizeof(response) - strlen(html));
+			if (!strstr(chtml,"\r\n")) {
+				printf("chtml: \"%s\"\n",chtml);
+				printf("Reading again:\n");
+				printf("read(%d,%p,%d)\n",sd,chtml,sizeof(response) - strlen(html));
+				read(sd,chtml,sizeof(response) - strlen(html));
+				printf("Copying past \\r\\n\n");
+			}
 			strcpy(chtml,chtml+2);
 			//break;
 		}
