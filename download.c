@@ -112,6 +112,7 @@ void get(int sd, char *path, char *filepath, char **request_headers) {
 		chunked = 1; // If content_length_undefined
 		char *chtml = html;
 		while (1) {
+			printf("html: %s\n",html);
 			*strchr(chtml,'\r') = '\0';
 			printf("c: '%s'\n",chtml);
 			if (!sscanf(chtml,"%x",&chunk_length)) {break;} 
