@@ -42,8 +42,7 @@ curl site.com/account --output page.html --cookie-jar cookies.txt --cookie cooki
 - holds element's class, id, style, etc.
 
 ## Timeline
-
-1/14: Downloading of files  
+ 
 1/18: Basic rendering of html page (without styling)  
 1/21: Putting output into ncurses window, let user scoll around page.  
 1/24: Styling, html form support.  
