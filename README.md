@@ -27,6 +27,7 @@ To then access, for example, an account settings page (anywhere that would requi
 ```
 curl site.com/account --output page.html --cookie-jar cookies.txt --cookie cookies.txt 
 ```
+could be used (i tested this with my softdev project as the site, it worked)
 
 ### Responsibilities:
 - Cameron: HTML && CSS Parsing
