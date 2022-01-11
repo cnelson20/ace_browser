@@ -15,7 +15,8 @@ The user can also just type the url of the page they want to access.
 #### How it will work:
 curl handles downloading html files
 curl, via flags --cookie-jar and --cookie, can write / read cookies from a site.
---output sends the downloaded page to a file, --silent suppress any output to stdio (good) 
+--output sends the downloaded page to a file, --silent suppresses any output to stdio (good) 
+--dump-header stores the http headers from a server's response to a file as well.
 
 For example,
 ```
