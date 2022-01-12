@@ -38,7 +38,7 @@ int curl(char *site, char *path, int method /* 1 = get, 0 = post*/) {
   toexec[9] = NULL;
   
   int i;
-  for (i = 0; *toexec[i]; i++) {
+  for (i = 0; toexec[i]; i++) {
 	printf("[%d]: '%s'\n",i,toexec[i]);
   }
   // Seg fault in for loop 
