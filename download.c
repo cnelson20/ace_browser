@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 
 char curl_strings[][16] = {/* 0 */ "curl", /* 1 */ "-d", /* 2 */ "--get", /* 3 */ "-o", /* 4 */ "--cookie-jar", /* 5 */ "--cookie", /* 6 */"--create-dirs", /* 7 */"cookies.txt", /* 8 */ "-s"};
