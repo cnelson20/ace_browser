@@ -12,7 +12,7 @@ int curl(char *site, char *path, int method /* 1 = get, 0 = post*/) {
   strcat(fullname,path);
 
   char *filename_tosave;
-  if (strchr(path,'/') == strchr(path,'\0') - 1) {
+  if (strchr(path,'/') == path[strlen(path)-1]) {
 	filename_tosave = malloc(strlen("/tmp/ace") + strlen(path) + strlen("index.html") + 1);
 	strcpy(filename_tosave,"/tmp/ace");
 	strcat(filename_tosave,path);
