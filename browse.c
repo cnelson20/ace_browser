@@ -137,6 +137,8 @@ char html_element_index_names[][16] = {
 };
 
 char *file;
+char *output;
+char *output_temp;
 
 /* 
 	Given a string of the tag name,
@@ -255,16 +257,23 @@ void render_page(struct html_element *html, struct html_element *body) {
 		while (*s) {
 			if (*s == 127) {
 				if (ISBLOCKLEVEL(body->children[i]->tag)) {
-					putchar('\n');
+					if (output_temp > output && *(output_temp-1) != '\n') {
+						*(output_temp++) = '\n';
+					}
 					render_page(html,body->children[i]);
+					output_temp = output + strlen(output);
+					if (output_temp > output && *(output_temp-1) != '\n') {
+						*(output_temp++) = '\n';
+					}
+					
 					i++;
-					putchar('\n');
 				} else {
 					render_page(html,body->children[i]);
+					output_temp = output + strlen(output);
 					i++;
 				}
 			} else {
-				putchar(*s);
+				*(output_temp++) = *s;
 			}
 			s++;
 		}
