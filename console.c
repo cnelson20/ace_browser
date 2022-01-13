@@ -2,21 +2,11 @@
 #include <ncurses.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
-
-char file[] = {"0123456789\
-0123456789\
-0123456789\
-0123456789\
-0123456789\
-0123456789\
-0123456789\
-0123456789\
-0123456789\
-0123456789"};
 
 int main(int argc, char *argv[]) {
 	int ch;
@@ -31,16 +21,19 @@ int main(int argc, char *argv[]) {
 	
 	int maxx, maxy;
 	getmaxyx(stdscr, maxy, maxx);
-	
-	char *copy = malloc(strlen(file)+1);
-	strcpy(copy,file);
+
+	struct stat std;
+	stat(argv[1],&std);
+	char *copy = malloc(std.st_size);
+	int fd = open(argv[1],O_RDONLY);
+	read(fd,copy,std.st_size);
+	close(fd);
 	char *temp = copy;
 	
 	int i;
 	for (i = 0; *temp; temp++) {
 		if (*temp == '\n') {i++;}
 	}
-	/* Seg fault here */
 	char **lines = malloc((i+1)*sizeof(char *));
 	temp = copy;
 	for (i = 0; temp && *temp; i++) {
@@ -48,23 +41,23 @@ int main(int argc, char *argv[]) {
 		lines[i] = curr;
 	}
 	lines[i] = NULL;
+	int max_scroll_y = i;
+	int max_scroll_x = 0;
 	
-	int scroll_x, scroll_y, max_scroll_x, max_scroll_y;
-	int max_x, max_y, max_line_strlen;
-	max_line_strlen = 0;
-	max_scroll_y = 0;
+
+	int max_x, max_y, max_line_strlen = 0;
 	getmaxyx(stdscr, max_y, max_x);
 	for (i = 0; lines[i]; i++) {
 		printw("lines[%d]: '%s'\n",i,lines[i]);
 		max_line_strlen = MAX(max_line_strlen,strlen(lines[i]));
 		max_scroll_x = (max_line_strlen > max_x) ? (max_line_strlen - max_x) : 0;
-		max_scroll_y++;
 	}
 	if (max_scroll_y > max_y) {
 		max_scroll_y -= max_y;
 	} else {
 		max_scroll_y = 0;
 	}
+	int scroll_x, scroll_y;
 	scroll_x = 0;
 	scroll_y = 0;
 	printw("max_x: %d  max_y: %d\n", max_x, max_y);
@@ -116,9 +109,10 @@ int main(int argc, char *argv[]) {
 		move(0,0);
 		int i,j;
 		for (j = scroll_y; j < scroll_y + max_y && lines[j]; j++) {
-			for (i = scroll_x; i < scroll_x + max_x && lines[j][i]; i++) {
+		  for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[j]) && lines[j][i]; i++) {
 				addch(lines[j][i]);
 			}
+			addch('\n');
 		}
 		move(y,x);
 		refresh();		
