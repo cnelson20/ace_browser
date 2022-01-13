@@ -1,1 +1,5 @@
+cameron -- 1/12/22 11:30
+start code to download pages
 
+cameron -- 1/12/22 21:25
+work on html parsing
