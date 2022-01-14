@@ -160,19 +160,16 @@ int get_html_element_index(char *name) {
 	Note: does not setup innertext field,
 */
 int init_html_element(struct html_element *html, struct html_element *f_parent, char *def, size_t def_length) {
-	printf("start init\n");
-	printf("def: '%s'\n",def);
-	
 	html->parent = f_parent;
 	html->children = NULL;
 	html->num_children = 0;
 	
 	static_tolowern(def,(char *)minpointer_nnull(strchr(def,' '),strchr(def,'>')) - def);
-	printf("static_tolower_string: '%s'\n",static_tolower_string);
+	//printf("static_tolower_string: '%s'\n",static_tolower_string);
 	int element_i = get_html_element_index(static_tolower_string);
 	if (element_i == -1) {return -1;}
 	html->tag = element_i;
-	printf("element_i: %d\n", element_i);
+	//printf("element_i: %d\n", element_i);
 	
 	if (strchr(def,' ') < strchr(def,'>')) {
 		char *copyfrom = strchr(def,' ') +1;
@@ -182,9 +179,16 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 		html->properties = NULL;	
 	}
 	
-	printf("done initing\n");
+	//printf("done initing\n");
 	
 	return 0;
+}
+
+char gen_console_attributes_char(struct html_element *html) {
+	unsigned char val = 1;
+	
+	
+	return (char)1;
 }
 
 /* 
@@ -461,12 +465,6 @@ int main(int argc, char *argv[]) {
 		html->innertext_length = 0;
 		
 		elem = html;
-		/*
-		printf("------------------------\n");
-		printf("Element: Tag: (%d) %s\n",elem->tag,html_element_index_names[elem->tag]);
-		printf("Properties: '%s'\n",elem->properties);
-		printf("------------------------\n");
-		*/
 		
 		cur = strchr(cur,'>');
 		while (qts[cur - file]) {
@@ -510,13 +508,6 @@ int main(int argc, char *argv[]) {
 					elem->innertext_size = 32;
 					elem->innertext_length = 0;
 				}
-				/*
-				printf("------------------------\n");
-				printf("Element: Tag: (%d) %s\n",elem->tag,html_element_index_names[elem->tag]);
-				printf("Properties: '%s'\n",elem->properties);
-				printf("------------------------\n");
-				*/
-				
 				
 				cur = strchr(cur,'>');
 				while (qts[cur - file]) {
