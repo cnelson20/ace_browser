@@ -152,6 +152,11 @@
 
 #define DONTPRINT(x) (x ==  ELEMENT_HEAD || x == ELEMENT_SCRIPT || x == ELEMENT_STYLE)
 
+#define DC1 0x11
+#define DC2 0x12
+#define DC3 0x13
+#define DC4 0x14
+
 struct html_element {
 	struct html_element *parent;
 	struct html_element **children;

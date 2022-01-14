@@ -260,6 +260,15 @@ void render_page(struct html_element *html, struct html_element *body) {
 	//print_html_structure(body,0);
 	
 	if (!DONTPRINT(body->tag)) {
+		if (output_temp - output + 1 >= output_size) {
+			output_size *= 2;
+			output = realloc(output,output_size);
+			output_temp = output + strlen(output);
+		}
+		*(output_temp++) = 0x11;
+		*(output_temp++) = 1;
+		*output_temp = '\0';
+		
 		while (*s) {
 			if (*s == 127) {
 				if (ISBLOCKLEVEL(body->children[i]->tag)) {
@@ -300,6 +309,14 @@ void render_page(struct html_element *html, struct html_element *body) {
 			}
 			s++;
 		}
+		
+		if (output_temp - output >= output_size) {
+			output_size *= 2;
+			output = realloc(output,output_size);
+			output_temp = output + strlen(output);
+		}
+		*(output_temp++) = DC2;
+		*output_temp = '\0';
 	}
 }
 

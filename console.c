@@ -8,6 +8,24 @@
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
+struct intnode {
+	int i;
+	struct intnode *next;
+};
+
+int strlen_special(char *s) {
+	int i = 0;
+	while (*s) {
+		if (*s == 127) {
+			
+		} else {
+			i++;
+			s++;
+		}
+	}
+	return i;
+}
+
 int main(int argc, char *argv[]) {
 	int ch;
 	
