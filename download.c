@@ -5,20 +5,12 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-<<<<<<< HEAD
-
-=======
 #include <errno.h>
-#include <sys/sem.h>
-#include <sys/shm.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <ctype.h>
-#include <time.h>
-
 #include "browse.h"
+
 #define IMPORTANT(x) (x == ELEMENT_BUTTON || x == ELEMENT_INPUT || x == ELEMENT_TEXTAREA || x == ELEMENT_SELECT)
->>>>>>> bbb7fc208a8890451e8a0ea81f4863134b99dcf7
 
 char curl_strings[][16] = {
 	/* 0 */ "curl", 
