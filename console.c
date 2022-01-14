@@ -177,9 +177,8 @@ int main(int argc, char *argv[]) {
 					if (lines[j][i] == DC1) {
 						i++;
 						set_attributes((unsigned char)lines[j][i]);
-						i++;
 						continue;
-					} else if (lines[j][i] == DC1) {
+					} else if (lines[j][i] == DC2) {
 						continue;
 					}
 					addch(lines[j][i]);
