@@ -560,6 +560,9 @@ int main(int argc, char *argv[]) {
 	printf("------------------------\n");		
 	
 	render_page(html,html);
+	fd = open(argv[2],O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	write(fd,output,strlen(output));
+	close(fd);
 
 	free(file);
 	free(qts);
