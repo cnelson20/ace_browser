@@ -152,7 +152,14 @@ int main(int argc, char *argv[]) {
 					move(cur_row,0);
 					cur_row += scroll_y;
 					for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[cur_row]) && lines[scroll_y + max_y - 1][i]; i++) {
-						addch(lines[cur_row][i]);
+						if (lines[j][i] == DC1) {
+							i++;
+							set_attributes((unsigned char)lines[j][i]);
+							continue;
+						} else if (lines[j][i] == DC2) {
+							continue;
+						}
+						addch(lines[j][i]);
 					}
 				} else {
 					int i;
@@ -162,7 +169,14 @@ int main(int argc, char *argv[]) {
 					}
 					move(0,0);
 					for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[scroll_y]) && lines[scroll_y][i]; i++) {
-						addch(lines[scroll_y][i]);
+						if (lines[j][i] == DC1) {
+							i++;
+							set_attributes((unsigned char)lines[j][i]);
+							continue;
+						} else if (lines[j][i] == DC2) {
+							continue;
+						}
+						addch(lines[j][i]);
 					}
 				}
 			}
