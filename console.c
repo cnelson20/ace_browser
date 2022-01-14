@@ -9,11 +9,6 @@
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
-struct intnode {
-	int i;
-	struct intnode *next;
-};
-
 int strlen_special(char *s) {
 	int i = 0;
 	while (*s) {
@@ -33,7 +28,7 @@ void set_attributes(unsigned char i) {
 	int val = 0;
 	if (i & 64) {val |= A_UNDERLINE;}
 	if (i & 128) {val |= A_BOLD;}
-	attrset(i);
+	attrset(val);
 }
 
 int main(int argc, char *argv[]) {
