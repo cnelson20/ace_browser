@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 	int ch;
 	
 	struct stat std;
-	char *copy, *temp;
+	char *copy, *temp; 
 	int max_x, max_y, max_line_strlen = 0;
 	int x,y;
 	int scroll_x, scroll_y;
@@ -27,6 +27,8 @@ int main(int argc, char *argv[]) {
 	
 	idlok(stdscr,TRUE);
 	scrollok(stdscr,TRUE);
+	start_color();
+	init_pair(1, COLOR_BLACK, COLOR_WHITE);
 	
 	stat(argv[1],&std);
 	copy = malloc(std.st_size);
@@ -66,8 +68,9 @@ int main(int argc, char *argv[]) {
 	printw("max_scroll_x: %d  max_scroll_y: %d\n", max_scroll_x, max_scroll_y);
 	printw("scroll_x: %d  scroll_y: %d\n", scroll_x, scroll_y);
 	
-	getyx(stdscr, y ,x);
 	is_not_firstloop = 0;
+	attron(COLOR_PAIR(1));
+	getyx(stdscr, y ,x);
 	while(1) {
 		int old_scroll_x = scroll_x;
 		int old_scroll_y = scroll_y;
@@ -137,6 +140,8 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		} else {
+			wbkgd(stdscr,COLOR_PAIR(1));
+			clear();
 			is_not_firstloop = 1;
 			move(0,0);
 			int i,j;
