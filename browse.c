@@ -139,6 +139,7 @@ char html_element_index_names[][16] = {
 char *file;
 char *output;
 char *output_temp;
+size_t output_size;
 
 /* 
 	Given a string of the tag name,
@@ -249,6 +250,11 @@ void test_print_structure(struct html_element *html) {
 
 /* Kinda renders the html dir structure */
 void render_page(struct html_element *html, struct html_element *body) {
+	if (output == NULL) {
+		output_size = 1024;
+		output = malloc(output_size);
+		output_temp = output;
+	}
 	char *s = body->innertext;
 	int i = 0;
 	//print_html_structure(body,0);
@@ -258,11 +264,22 @@ void render_page(struct html_element *html, struct html_element *body) {
 			if (*s == 127) {
 				if (ISBLOCKLEVEL(body->children[i]->tag)) {
 					if (output_temp > output && *(output_temp-1) != '\n') {
+						if (output_temp - output >= output_size) {
+							output_size *= 2;
+							output = realloc(output,output_size);
+							output_temp = output + strlen(output);
+						}
 						*(output_temp++) = '\n';
+						*(output_temp) = '\0';
 					}
 					render_page(html,body->children[i]);
 					output_temp = output + strlen(output);
 					if (output_temp > output && *(output_temp-1) != '\n') {
+						if (output_temp - output >= output_size) {
+							output_size *= 2;
+							output = realloc(output,output_size);
+							output_temp = output + strlen(output);
+						}
 						*(output_temp++) = '\n';
 					}
 					
@@ -273,7 +290,13 @@ void render_page(struct html_element *html, struct html_element *body) {
 					i++;
 				}
 			} else {
+				if (output_temp - output >= output_size) {
+					output_size *= 2;
+					output = realloc(output,output_size);
+					output_temp = output + strlen(output);
+				}
 				*(output_temp++) = *s;
+				*(output_temp) = '\0';
 			}
 			s++;
 		}
