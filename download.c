@@ -4,6 +4,8 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+
 
 char curl_strings[][16] = {/* 0 */ "curl", /* 1 */ "-d", /* 2 */ "--get", /* 3 */ "-o", /* 4 */ "--cookie-jar", /* 5 */ "--cookie", /* 6 */"--create-dirs", /* 7 */"cookies.txt", /* 8 */ "-s"};
 
@@ -64,7 +66,7 @@ int curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **form_
 		int childexitstatus;
 		wait(&childexitstatus);
 	} else {
-		mkdir("files/", 0644);
+		mkdir("files/", 0755);
 		execvp(toexec[0],toexec);
 	}
   
