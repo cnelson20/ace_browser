@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "browse.h"
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
@@ -16,14 +17,23 @@ struct intnode {
 int strlen_special(char *s) {
 	int i = 0;
 	while (*s) {
-		if (*s == 127) {
-			
+		if (*s == DC1) {
+			s += 2;
+		} else if (*s == DC2) {
+			s++;
 		} else {
 			i++;
 			s++;
 		}
 	}
 	return i;
+}
+
+void set_attributes(unsigned char i) {
+	int val = 0;
+	if (i & 64) {val |= A_UNDERLINE;}
+	if (i & 128) {val |= A_BOLD;}
+	attrset(i);
 }
 
 int main(int argc, char *argv[]) {
@@ -72,7 +82,7 @@ int main(int argc, char *argv[]) {
 	getmaxyx(stdscr, max_y, max_x);
 	for (i = 0; lines[i]; i++) {
 		printw("lines[%d]: '%s'\n",i,lines[i]);
-		max_line_strlen = MAX(max_line_strlen,strlen(lines[i]));
+		max_line_strlen = MAX(max_line_strlen,strlen_special(lines[i]));
 		max_scroll_x = (max_line_strlen > max_x) ? (max_line_strlen - max_x) : 0;
 	}
 	if (max_scroll_y > max_y) {
@@ -87,7 +97,6 @@ int main(int argc, char *argv[]) {
 	printw("scroll_x: %d  scroll_y: %d\n", scroll_x, scroll_y);
 	
 	is_not_firstloop = 0;
-	attron(COLOR_PAIR(1));
 	getyx(stdscr, y ,x);
 	while(1) {
 		int old_scroll_x = scroll_x;
@@ -158,13 +167,21 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		} else {
-			wbkgd(stdscr,COLOR_PAIR(1));
+			//wbkgd(stdscr,COLOR_PAIR(1));
 			clear();
 			is_not_firstloop = 1;
 			move(0,0);
 			int i,j;
 			for (j = scroll_y; j < scroll_y + max_y && lines[j]; j++) {
 				for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[j]) && lines[j][i]; i++) {
+					if (lines[j][i] == DC1) {
+						i++;
+						set_attributes((unsigned char)lines[j][i]);
+						i++;
+						continue;
+					} else if (lines[j][i] == DC1) {
+						continue;
+					}
 					addch(lines[j][i]);
 				}
 				addch('\n');
