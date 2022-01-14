@@ -185,7 +185,10 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 }
 
 char gen_console_attributes_char(struct html_element *html) {
-	unsigned char val = 1;
+	unsigned char val = 0;
+	val |= 1;
+	if (html->tag == ELEMENT_A) { val |= 64; }
+	if (html->tag == ELEMENT_B || html->tag == ELEMENT_STRONG) { val |= 128; }
 	
 	
 	return (char)1;

@@ -172,6 +172,7 @@ struct html_element {
 
 int get_html_element_index(char *name);
 int init_html_element(struct html_element *html, struct html_element *f_parent, char *def, size_t def_length);
+char gen_console_attributes_char(struct html_element *html);
 
 int min(int a, int b);
 void *minpointer_nnull(void *a, void *b);
