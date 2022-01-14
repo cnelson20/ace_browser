@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 	int x,y;
 	int scroll_x, scroll_y;
 	int max_scroll_y, max_scroll_x;
-	int i, fd;
+	int i, fd , is_not_firstloop;
 	char **lines;
 	
 	initscr();
@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
 	printw("scroll_x: %d  scroll_y: %d\n", scroll_x, scroll_y);
 	
 	getyx(stdscr, y ,x);
+	is_not_firstloop = 0;
 	while(1) {
 		int old_scroll_x = scroll_x;
 		int old_scroll_y = scroll_y;
@@ -108,25 +109,39 @@ int main(int argc, char *argv[]) {
 					break;
 			}
 		}
-		if (scroll_x == old_scroll_x) {
+		if (scroll_x == old_scroll_x && is_not_firstloop) {
 			if (scroll_y != old_scroll_y) {
 				if (scroll_y > old_scroll_y) {
+					int i, cur_row; 
+					
 					while (scroll_y > old_scroll_y) {
-						scroll(1);
+						scrl(1);
 						old_scroll_y++;
 					}
+					cur_row = max_y - 1;
+					move(cur_row,0);
+					cur_row += scroll_y;
+					for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[cur_row]) && lines[scroll_y + max_y - 1][i]; i++) {
+						addch(lines[cur_row][i]);
+					}
 				} else {
+					int i;
 					while (scroll_y < old_scroll_y) {
-						scroll(-1);
+						scrl(-1);
 						old_scroll_y--;
+					}
+					move(0,0);
+					for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[scroll_y]) && lines[scroll_y][i]; i++) {
+						addch(lines[scroll_y][i]);
 					}
 				}
 			}
 		} else {
+			is_not_firstloop = 1;
 			move(0,0);
 			int i,j;
 			for (j = scroll_y; j < scroll_y + max_y && lines[j]; j++) {
-			for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[j]) && lines[j][i]; i++) {
+				for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[j]) && lines[j][i]; i++) {
 					addch(lines[j][i]);
 				}
 				addch('\n');
