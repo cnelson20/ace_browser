@@ -184,6 +184,26 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 	return 0;
 }
 
+void free_html_element(struct html_element *html) {
+	//printf("freeing '%s':\n",html_element_index_names[html->tag]);
+	
+	if (html->num_children != 0) {
+		int i;
+		for (i = 0; i < html->num_children; i++) {
+			free_html_element(html->children[i]);
+		}
+		free(html->children);
+	}
+	
+	//printf("freeing %s->properties: '%s'\n",html_element_index_names[html->tag],html->properties);
+	free(html->properties);
+	//printf("freeing %s->innertext: '%s'\n",html_element_index_names[html->tag],html->innertext);
+	free(html->innertext);
+	
+	//printf("freeing '%s' itself:\n",html_element_index_names[html->tag]);
+	free(html);
+}
+
 char gen_console_attributes_char(struct html_element *html) {
 	unsigned char val = 0;
 	unsigned char color = 1;
@@ -429,13 +449,6 @@ char *get_default_innerhtml(int tag) {
 }
 
 int main(int argc, char *argv[]) {
-	/*
-	int i;
-	for (i = 0; i < sizeof(html_element_index_names) / sizeof(html_element_index_names[0]); i++) {
-		printf("[%d]: %s\n",i,html_element_index_names[i]); 
-	}
-	*/
-	
 	if (argc <= 1) {printf("give file\n"); return 1;}
 	struct stat fileinfo;
 	stat(argv[1],&fileinfo);
@@ -562,8 +575,9 @@ int main(int argc, char *argv[]) {
 	    close(fd);
 	}
 
+	free(output);
 	free(file);
 	free(qts);
-	
+	free_html_element(html);
 	return 0;
 }
