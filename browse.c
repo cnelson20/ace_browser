@@ -190,8 +190,9 @@ char gen_console_attributes_char(struct html_element *html) {
 	if (html->tag == ELEMENT_A) { val |= 64; }
 	if (html->tag == ELEMENT_B || html->tag == ELEMENT_STRONG) { val |= 128; }
 	
-	
-	return (char)1;
+	//printf("Element_tag: '%s'\n",html_element_index_names[html->tag]);
+	//printf("rval: %hhu\n",val);
+	return (char)val;
 }
 
 /* 
@@ -273,7 +274,7 @@ void render_page(struct html_element *html, struct html_element *body) {
 			output_temp = output + strlen(output);
 		}
 		*(output_temp++) = 0x11;
-		*(output_temp++) = 1;
+		*(output_temp++) = gen_console_attributes_char(body);
 		*output_temp = '\0';
 		
 		while (*s) {

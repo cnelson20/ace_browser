@@ -29,6 +29,8 @@ void set_attributes(unsigned char i) {
 	if (i & 64) {val |= A_UNDERLINE;}
 	if (i & 128) {val |= A_BOLD;}
 	attrset(val);
+	
+	printw("%hhu",i);
 }
 
 int main(int argc, char *argv[]) {
