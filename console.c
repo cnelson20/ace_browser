@@ -24,7 +24,7 @@ int strlen_special(char *s) {
 	return i;
 }
 
-int colors_array[] = {COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE};
+int colors_array[] = {COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN};
 void init_colors() {
   int i,j;
   for (j = 0; j < 8; j++) {
@@ -41,6 +41,7 @@ void set_attributes(unsigned char i) {
     int val = 0;
 	if (i & 64) {val |= A_UNDERLINE;}
 	if (i & 128) {val |= A_BOLD;}
+	val |= COLOR_PAIR(i%64);
 	attrset(val);
 	
 	//printw("%hhu",i);

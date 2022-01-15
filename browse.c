@@ -186,9 +186,10 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 
 char gen_console_attributes_char(struct html_element *html) {
 	unsigned char val = 0;
-	val |= 1;
-	if (html->tag == ELEMENT_A) { val |= 64; }
+	unsigned char color = 1;
+	if (html->tag == ELEMENT_A) { val |= 64; color = 5;}
 	if (html->tag == ELEMENT_B || html->tag == ELEMENT_STRONG) { val |= 128; }
+	val |= color;
 	
 	//printf("Element_tag: '%s'\n",html_element_index_names[html->tag]);
 	//printf("rval: %hhu\n",val);
