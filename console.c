@@ -23,9 +23,21 @@ int strlen_special(char *s) {
 	}
 	return i;
 }
+int colors_array[] = {COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE};
+void init_colors() {
+  int i,j;
+  for (j = 0; j < 8; j++) {
+	for (i = 0; i < 8; i++) {
+	  if (i != j) {
+		  init_pair(j*8+i, colors_array[i], colors_array[j]);
+	  }
+	}
+  }
+}
 
 void set_attributes(unsigned char i) {
-	int val = 0;
+    printw("%hhu",i);
+    int val = 0;
 	if (i & 64) {val |= A_UNDERLINE;}
 	if (i & 128) {val |= A_BOLD;}
 	attrset(val);
@@ -53,7 +65,8 @@ int main(int argc, char *argv[]) {
 	idlok(stdscr,TRUE);
 	scrollok(stdscr,TRUE);
 	start_color();
-	init_pair(1, COLOR_BLACK, COLOR_WHITE);
+	init_colors();
+	bkgd(COLOR_PAIR(1));
 	
 	stat(argv[1],&std);
 	copy = malloc(std.st_size);
@@ -92,13 +105,14 @@ int main(int argc, char *argv[]) {
 	printw("max_x: %d  max_y: %d\n", max_x, max_y);
 	printw("max_scroll_x: %d  max_scroll_y: %d\n", max_scroll_x, max_scroll_y);
 	printw("scroll_x: %d  scroll_y: %d\n", scroll_x, scroll_y);
-	
+
+	attrset(COLOR_PAIR(1));
 	is_not_firstloop = 0;
 	getyx(stdscr, y ,x);
 	while(1) {
 		int old_scroll_x = scroll_x;
 		int old_scroll_y = scroll_y;
-		
+
 		ch = getch();
 		if (ch >= 0x20 && ch < 0x7F) {
 			break;

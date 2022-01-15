@@ -349,7 +349,7 @@ void *minpointer_nnull(void *a, void *b) {
 	Returns whether is an char is considered whitespace
 */
 int is_whitespace_char(int c) {
-	return c == 0xa || c == 0xc || c == 0xd || c == 0x20;
+	return c == '\n' || c == '\f' || c == '\r' || c == '\t' || c == ' ';
 }
 
 /* 
@@ -530,12 +530,12 @@ int main(int argc, char *argv[]) {
 				cur = strchr(cur,'>')+1;
 			}		
 		} else {
-			if (!is_whitespace_char(*cur) || (elem->innertext_length != 0 && !is_whitespace_char(*(cur-1)))) {
+			if (!is_whitespace_char(*cur) || (elem->innertext_length != 0 && !is_whitespace_char(*(cur-1)) )) {
 				if (elem->innertext_length >= elem->innertext_size - 1) {
 					elem->innertext = realloc(elem->innertext, elem->innertext_size * 2);
 					elem->innertext_size *= 2;
 				}
-				if (*cur == '\n' || *cur == '\r') {
+				if (*cur == '\n' || *cur == '\r' || *cur == '\t') {
 					elem->innertext[(elem->innertext_length)++] = ' ';
 					cur++;
 				} else {
@@ -555,9 +555,11 @@ int main(int argc, char *argv[]) {
 	printf("------------------------\n");		
 	
 	render_page(html,html);
-	fd = open(argv[2],O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	write(fd,output,strlen(output));
-	close(fd);
+	if (argc >= 3) {
+    	fd = open(argv[2],O_WRONLY | O_CREAT | O_TRUNC, 0644);
+     	write(fd,output,strlen(output));
+	    close(fd);
+	}
 
 	free(file);
 	free(qts);
