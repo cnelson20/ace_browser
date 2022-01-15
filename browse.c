@@ -141,6 +141,8 @@ char *output;
 char *output_temp;
 size_t output_size;
 
+struct html_element *html;
+
 /* 
 	Given a string of the tag name,
 	return an int corresponding to the tag
@@ -164,12 +166,11 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 	html->children = NULL;
 	html->num_children = 0;
 	
+	/* get tag name ('body', 'div', 'a', etc.) */
 	static_tolowern(def,(char *)minpointer_nnull(strchr(def,' '),strchr(def,'>')) - def);
-	//printf("static_tolower_string: '%s'\n",static_tolower_string);
 	int element_i = get_html_element_index(static_tolower_string);
 	if (element_i == -1) {return -1;}
 	html->tag = element_i;
-	//printf("element_i: %d\n", element_i);
 	
 	if (strchr(def,' ') < strchr(def,'>')) {
 		char *copyfrom = strchr(def,' ') +1;
@@ -178,13 +179,15 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 	} else {
 		html->properties = NULL;	
 	}
-	
-	//printf("done initing\n");
-	
+		
 	return 0;
 }
 
+/*
+	Frees a html element recursively
+*/
 void free_html_element(struct html_element *html) {
+	//printf("html addr: %p\n",html);
 	//printf("freeing '%s':\n",html_element_index_names[html->tag]);
 	
 	if (html->num_children != 0) {
@@ -204,6 +207,9 @@ void free_html_element(struct html_element *html) {
 	free(html);
 }
 
+/* 
+	Generates a numerical char that represents attributes of an html for ncurses
+*/
 char gen_console_attributes_char(struct html_element *html) {
 	unsigned char val = 0;
 	unsigned char color = 1;
@@ -211,8 +217,6 @@ char gen_console_attributes_char(struct html_element *html) {
 	if (html->tag == ELEMENT_B || html->tag == ELEMENT_STRONG) { val |= 128; }
 	val |= color;
 	
-	//printf("Element_tag: '%s'\n",html_element_index_names[html->tag]);
-	//printf("rval: %hhu\n",val);
 	return (char)val;
 }
 
@@ -278,24 +282,27 @@ void test_print_structure(struct html_element *html) {
 
 
 /* Kinda renders the html dir structure */
-void render_page(struct html_element *html, struct html_element *body) {
+char *render_page(struct html_element *html, struct html_element *body) {
 	if (output == NULL) {
 		output_size = 1024;
 		output = malloc(output_size);
 		output_temp = output;
+		*output_temp = '\0';
 	}
 	char *s = body->innertext;
 	int i = 0;
 	//print_html_structure(body,0);
 	
 	if (!DONTPRINT(body->tag)) {
-		if (output_temp - output + 1 >= output_size) {
+		if (output_temp - output + sizeof(struct html_element *) >= output_size) {
 			output_size *= 2;
 			output = realloc(output,output_size);
 			output_temp = output + strlen(output);
 		}
 		*(output_temp++) = 0x11;
+		
 		*(output_temp++) = gen_console_attributes_char(body);
+		
 		*output_temp = '\0';
 		
 		while (*s) {
@@ -347,6 +354,8 @@ void render_page(struct html_element *html, struct html_element *body) {
 		*(output_temp++) = DC2;
 		*output_temp = '\0';
 	}
+	
+	return output_temp;
 }
 
 /* 
@@ -448,11 +457,11 @@ char *get_default_innerhtml(int tag) {
 	}
 }
 
-int main(int argc, char *argv[]) {
-	if (argc <= 1) {printf("give file\n"); return 1;}
+char *render_html_file(char *filename, char *output_filename) {
 	struct stat fileinfo;
-	stat(argv[1],&fileinfo);
-	int fd = open(argv[1], O_RDONLY);
+	
+	stat(filename,&fileinfo);
+	int fd = open(filename, O_RDONLY);
 	if (fd == -1) {printf("fuck\n");}
 	file = malloc(fileinfo.st_size+1);
 	read(fd,file,fileinfo.st_size);
@@ -461,7 +470,7 @@ int main(int argc, char *argv[]) {
 	char *qts = geninquotes_html(file,strlen(file));
 	char *cur = file;
 	
-	struct html_element *html = NULL;
+	html = NULL;
 	struct html_element *elem = NULL;
 	
 	while (1) {
@@ -566,18 +575,26 @@ int main(int argc, char *argv[]) {
 	
 	printf("\n------------------------\n");
 	test_print_structure(html);
-	printf("------------------------\n");		
+	printf("\n------------------------\n");
 	
 	render_page(html,html);
-	if (argc >= 3) {
-    	fd = open(argv[2],O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (output_filename != NULL) {
+    	fd = open(output_filename,O_WRONLY | O_CREAT | O_TRUNC, 0644);
      	write(fd,output,strlen(output));
 	    close(fd);
 	}
 
-	free(output);
 	free(file);
 	free(qts);
-	free_html_element(html);
-	return 0;
+	
+	output = realloc(output,strlen(output)+1);
+	return output;
 }
+
+/*
+int main(int argc, char *argv[]) {
+	if (argc <= 1) {printf("give file\n"); return 1;}
+	char *out = render_html_file(argv[1],argc >= 3 ? argv[2] : NULL);
+	free(out);
+}
+*/

@@ -162,16 +162,20 @@ struct html_element {
 	struct html_element **children;
 	int num_children;
 	
-	
 	int tag;
 	char *innertext;
 	int innertext_length;
 	int innertext_size;
 	char *properties;
+	
+	int lx,ly,rx,ry;
 };
 
+/* Functions */
 int get_html_element_index(char *name);
 int init_html_element(struct html_element *html, struct html_element *f_parent, char *def, size_t def_length);
+void free_html_element(struct html_element *html);
+
 char gen_console_attributes_char(struct html_element *html);
 
 int min(int a, int b);
@@ -188,3 +192,14 @@ void print_element_path_nonewline(struct html_element *html);
 void print_element_path(struct html_element *html);
 void test_print_structure(struct html_element *html);
 void print_html_structure(struct html_element *html, unsigned char rec);
+
+char *render_page(struct html_element *html, struct html_element *body);
+char *render_html_file(char *filename, char *output_filename);
+
+/* Global Variables */
+char *file;
+char *output;
+char *output_temp;
+size_t output_size;
+
+struct html_element *html;
