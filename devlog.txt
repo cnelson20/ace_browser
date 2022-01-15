@@ -4,6 +4,10 @@ start code to download pages
 cameron -- 1/12/22 21:25
 work on html parsing
 
-cameron -- 1/12/23 21:25
+cameron -- 1/12/22 21:25
 make browse not duplicate newlines (makes "rendered" page look better")
 console scrolling is more efficient
+
+cameron -- 1/14/22 23:25
+fix some whitespace issues in browse
+working on color in terminal

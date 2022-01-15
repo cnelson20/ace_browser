@@ -530,7 +530,7 @@ int main(int argc, char *argv[]) {
 				cur = strchr(cur,'>')+1;
 			}		
 		} else {
-			if (!is_whitespace_char(*cur) || (elem->innertext_length != 0 && !is_whitespace_char(*(cur-1)) )) {
+			if (!is_whitespace_char(*cur) || (elem->innertext_length != 0 && elem->innertext[elem->innertext_length - 1] != 127 && !is_whitespace_char(*(cur-1)))) {
 				if (elem->innertext_length >= elem->innertext_size - 1) {
 					elem->innertext = realloc(elem->innertext, elem->innertext_size * 2);
 					elem->innertext_size *= 2;

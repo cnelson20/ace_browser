@@ -26,7 +26,6 @@ int strlen_special(char *s) {
 
 int colors_array[] = {COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE};
 void init_colors() {
-  /*
   int i,j;
   for (j = 0; j < 8; j++) {
 	for (i = 0; i < 8; i++) {
@@ -35,8 +34,7 @@ void init_colors() {
 	  }
 	}
   }
-  */
-  init_pair(1,COLOR_WHITE, COLOR_BLACK);
+  //init_pair(1,COLOR_WHITE, COLOR_BLACK);
 }
 
 void set_attributes(unsigned char i) {
@@ -45,7 +43,7 @@ void set_attributes(unsigned char i) {
 	if (i & 128) {val |= A_BOLD;}
 	attrset(val);
 	
-	printw("%hhu",i);
+	//printw("%hhu",i);
 }
 
 int main(int argc, char *argv[]) {
@@ -69,7 +67,6 @@ int main(int argc, char *argv[]) {
 	scrollok(stdscr,TRUE);
 	start_color();
 	init_colors();
-	//bkgd(COLOR_PAIR(1));
 	
 	stat(argv[1],&std);
 	copy = malloc(std.st_size);
@@ -114,7 +111,7 @@ int main(int argc, char *argv[]) {
 	printw("scroll_x: %d  scroll_y: %d\n", scroll_x, scroll_y);
 	*/
 
-	//attrset(COLOR_PAIR(1));
+	attrset(COLOR_PAIR(1));
 	is_not_firstloop = 0;
 	getyx(stdscr, y ,x);
 	while(1) {
@@ -204,7 +201,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		} else {
-			//wbkgd(stdscr,COLOR_PAIR(1));
+			wbkgd(stdscr,COLOR_PAIR(1));
 			clear();
 			is_not_firstloop = 1;
 			move(0,0);
@@ -213,7 +210,7 @@ int main(int argc, char *argv[]) {
 				for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[j]) && lines[j][i]; i++) {
 					if (lines[j][i] == DC1) {
 						i++;
-						//set_attributes((unsigned char)lines[j][i]);
+						set_attributes((unsigned char)lines[j][i]);
 						continue;
 					} else if (lines[j][i] == DC2) {
 						continue;
