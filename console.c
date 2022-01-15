@@ -67,13 +67,6 @@ void print_html_element_xy(struct html_element *html) {
 }
 
 struct html_element *search_html_xy(struct html_element *html, int x, int y) {
-	/*
-	attrset(COLOR_PAIR(1));
-	printw("elem: '%s'\n",html_element_index_names[html->tag]);
-	printw("lx: %d  ly: %d\n",html->lx,html->ly);
-	printw("rx: %d  ry: %d\n",html->rx,html->ry);
-	//*/
-	
 	if (html->ly > y || html->ry < y) {
 		return NULL;
 	} 
@@ -92,25 +85,8 @@ struct html_element *search_html_xy(struct html_element *html, int x, int y) {
 				return temp;
 			}
 		}
-		return NULL;
+		return NULL;	
 	}
-	/*
-	int min = 0;
-	int max = html->num_children;
-	while (1) {
-		int i = (max - min) / 2 + min;
-		struct html_element *temp;
-		
-		temp = search_html_xy(html->children[i],x,y);
-		if (temp != NULL) { return temp; }
-		if (max == min) {return NULL; }
-		if (html->children[i]->ly >= y && html->children[i]->lx >= x) {
-			min = i+1;
-		} else {
-			max = i;
-		}
-	}
-	*/	
 }
 
 
