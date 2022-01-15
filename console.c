@@ -71,7 +71,7 @@ struct html_element *search_html_xy(struct html_element *html, int x, int y) {
 		return NULL;
 	} 
 	if (html->num_children == 0) {
-		if (html->lx < x && x < html->rx) {
+		if (html->lx <= x && x < html->rx) {
 			return html;
 		} else {
 			return NULL;
