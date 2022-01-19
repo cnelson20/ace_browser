@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
 			switch (ch) {
 				case '\n':
 					move(scroll_y + y, scroll_x + x);
-					printw("Enter");
+					//printw("Enter");
 					selected = search_html_xy(html,scroll_x + x, scroll_y + y);
 					if (selected != NULL) {
 						endwin();
