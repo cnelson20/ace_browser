@@ -41,6 +41,23 @@ void init_colors() {
   //init_pair(1,COLOR_WHITE, COLOR_BLACK);
 }
 
+void get_site_path_from_url(char *link, char **site, char **path) {
+	if (strchr(link,'/')) {
+	  *path = malloc(strlen(strchr(link,'/')) + 1);
+	  strcpy(*path,strchr(link,'/'));
+	  *strchr(link,'/') = '\0';
+	  *site = malloc(strlen(link) + 1);
+	  strcpy(*site,link);
+	  *strchr(link,'\0') = '/';
+	} else {
+	  *path = malloc(strlen("/") + 1);
+	  strcpy(*path,"/");
+	  *site = malloc(strlen(link) + 1);
+	  strcpy(*site,link);
+	}
+   
+}
+
 void set_attributes(unsigned char i) {
     int val = 0;
 	if (i & 64) {val |= A_UNDERLINE;}
@@ -151,18 +168,7 @@ int main(int argc, char *argv[]) {
 	char **lines;
 
 	/* Download file */
-	if (strchr(argv[1],'/')) {
-	  path = malloc(strlen(strchr(argv[1],'/')) + 1);
-	  strcpy(path,strchr(argv[1],'/'));
-	  *strchr(argv[1],'/') = '\0';
-	  site = malloc(strlen(argv[1]) + 1);
-	  strcpy(site,argv[1]);
-	} else {
-	  path = malloc(strlen("/") + 1);
-	  strcpy(path,"/");
-	  site = malloc(strlen(argv[1]) + 1);
-	  strcpy(site,argv[1]);
-	}
+	get_site_path_from_url(argv[1],&site,&path);
 	char *dwld_file = curl(site,path,1,NULL);
 	
 	printf("site: '%s', path: '%s'\n",site,path);
@@ -259,7 +265,22 @@ int main(int argc, char *argv[]) {
 					if (selected != NULL) {
 						switch (selected->tag) {
 						case ELEMENT_A:
-							endwin();
+						    endwin();
+							char *tempproperties = selected->properties;
+							while (*(tempproperties + 4 /* strlen("href=") - 1 */)) {
+							  static_tolowern(tempproperties,5);
+							  printf("5 bytes: '%s'\n",static_tolower_string);
+							  if (!memcmp(static_tolower_string,tempproperties,5)) {
+								  printf("malloc\n");
+								  char *href = malloc(strchr(tempproperties+5,' ') - tempproperties - 5 + 1);
+								  printf("strncpy\n");
+								  strncpy(href,strchr(tempproperties,'=')+1,strchr(tempproperties,' ') - strchr(tempproperties,'='));
+								  printf("printf\n");
+								  printf("Found!: %d, href=\"%s\"\n",strchr(tempproperties,' ') - strchr(tempproperties,'='), href);
+								  break;
+							  }
+							  tempproperties++;
+							}
 							printf("%s\n",html_element_index_names[selected->tag]);
 							printf("innertext: '%s'\n",selected->innertext);
 							exit(0);
