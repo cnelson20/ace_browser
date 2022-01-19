@@ -8,11 +8,9 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <ctype.h>
 #include "browse.h"
-#include "download.h"
 
-#define IMPORTANT(x) (x == ELEMENT_BUTTON || x == ELEMENT_INPUT || x == ELEMENT_TEXTAREA /*|| x == ELEMENT_SELECT*/)
+#define IMPORTANT(x) (x == ELEMENT_BUTTON || x == ELEMENT_INPUT || x == ELEMENT_TEXTAREA || x == ELEMENT_SELECT)
 
 char curl_strings[][16] = {
 	/* 0 */ "curl", 
@@ -94,41 +92,23 @@ int curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **form_
 	return 0;
 }
 
-struct form_args_holder *post_check(struct html_element * current, struct html_element * form, struct form_args_holder *gen) {
+char** post_check(struct html_element * current, struct html_element * form) {
 	if(current == form) {
 		if (current->num_children != 0 && current->tag == ELEMENT_FORM) {
 			int i;		
-			free(gen); // free does nothing if gen is NULL;
-			gen = malloc(sizeof(struct form_args_holder));
-			gen->args = malloc(sizeof(char **));
-			gen->length = 0;
-			
 			for (i = 0; i < current->num_children; i++) {
-			    post_check(current->children[i], form, gen);
+				post_check(current->children[i], form);
 			}
-			gen->args = realloc(gen->args,(gen->length+1)*sizeof(char **));
-			gen->args[gen->length+1] = NULL;
 		}
 	} else {
 		if (current->num_children != 0) {
 			int i;		
 			for (i = 0; i < current->num_children; i++) {
-			    post_check(current->children[i], form, gen);
+				post_check(current->children[i], form);
 			}
 		}
 		if(IMPORTANT(current->tag)) {
-		    char *string = malloc(2048);
-			char *tempproperties = current->properties;
-			while (*(tempproperties + strlen("name") - 1)) {
-			    static_tolowern(tempproperties,strlen("name"));
-				if (!strcmp(static_tolower_string,"name")) {
-				  strncpy(string,strchr(tempproperties,'='),strchr(tempproperties,' ') - strchr(tempproperties,'='));
-				  strncat(string,"=",2048-strlen(string));
-				  strncat(string,current->innertext,2048-strlen(string));
-				}
-			}
-			gen->args = realloc(gen->args,(gen->length+1)*sizeof(char **));
-			gen->args[(gen->length)++] = string;
+			printf("%d\n",current->tag);
 		}
 	}
 	return NULL;
