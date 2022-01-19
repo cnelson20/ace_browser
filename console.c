@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "browse.h"
+#include "download.h"
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
@@ -141,20 +142,36 @@ int main(int argc, char *argv[]) {
 	struct stat std;
 	struct unschar_stack *attr_stack;
 	
-	char *temp; 
+	char *temp, *site, *path; 
 	int max_x, max_y;
 	int x,y;
 	int scroll_x, scroll_y;
 	int max_scroll_y, max_scroll_x;
 	int i, fd , is_not_firstloop;
 	char **lines;
+
+	/* Download file */
+	if (strchr(argv[1],'/')) {
+	  path = malloc(strlen(strchr(argv[1],'/')) + 1);
+	  strcpy(path,strchr(argv[1],'/'));
+	  *strchr(argv[1],'/') = '\0';
+	  site = malloc(strlen(argv[1]) + 1);
+	  strcpy(site,argv[1]);
+	} else {
+	  path = malloc(strlen("/") + 1);
+	  strcpy(path,"/");
+	  site = malloc(strlen(argv[1]) + 1);
+	  strcpy(site,argv[1]);
+	}
+	char *dwld_file = curl(site,path,1,NULL);
 	
+	printf("site: '%s', path: '%s'\n",site,path);
 	/* 
 		Render the html page
 		gets saved to output
 		html is the parent for the whole page
 	*/
-	render_html_file(argv[1],"output.dat");
+	render_html_file(dwld_file,"output.dat");
 	/* This would read from a file 
 	stat(argv[1],&std);
 	fd = open(argv[1], O_RDONLY);
@@ -360,6 +377,10 @@ int main(int argc, char *argv[]) {
 	free_html_element(html);
 	free(lines);
 	free(output);	
+
+	free(site);
+	free(path);
+	free(dwld_file);
 	
 	return 0;
 }

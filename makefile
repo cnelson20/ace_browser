@@ -6,8 +6,8 @@ download: download.o
 download.o: download.c
 	gcc -c download.c
 
-console: console.o browse.o
-	gcc console.o browse.o -o console -lncurses
+console: console.o browse.o download.o
+	gcc console.o browse.o download.o -o console -lncurses
 
 console.o: console.c browse.h
 	gcc -c console.c

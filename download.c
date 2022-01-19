@@ -9,8 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "browse.h"
-
-#define IMPORTANT(x) (x == ELEMENT_BUTTON || x == ELEMENT_INPUT || x == ELEMENT_TEXTAREA || x == ELEMENT_SELECT)
+#include "download.h"
 
 char curl_strings[][16] = {
 	/* 0 */ "curl", 
@@ -24,7 +23,7 @@ char curl_strings[][16] = {
 	/* 8 */ "-s"
 	};
 
-int curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **form_data) {
+char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **form_data) {
 	char *fullname = malloc(strlen(site) + strlen(path) + 1);
 	strcpy(fullname,site);
 	strcat(fullname,path);
@@ -86,25 +85,25 @@ int curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **form_
 	}
   
 	free(fullname);
-	free(filename_tosave);
+	//free(filename_tosave);
 	free(toexec);
   
-	return 0;
+	return filename_tosave;
 }
 
-char** post_check(struct html_element * current, struct html_element * form) {
+struct form_args_holder *post_check(struct html_element * current, struct html_element * form ,struct form_args_holder *gen) {
 	if(current == form) {
 		if (current->num_children != 0 && current->tag == ELEMENT_FORM) {
 			int i;		
 			for (i = 0; i < current->num_children; i++) {
-				post_check(current->children[i], form);
+ 			    post_check(current->children[i], form, gen);
 			}
 		}
 	} else {
 		if (current->num_children != 0) {
 			int i;		
 			for (i = 0; i < current->num_children; i++) {
-				post_check(current->children[i], form);
+ 			   post_check(current->children[i], form, gen);
 			}
 		}
 		if(IMPORTANT(current->tag)) {
@@ -114,7 +113,9 @@ char** post_check(struct html_element * current, struct html_element * form) {
 	return NULL;
 }
 
+/*
 int main(int argc, char *argv[]) {
-  curl(argv[1],argv[2],1, NULL);
+  free(curl(argv[1],argv[2],1, NULL));
 }
+*/
 
