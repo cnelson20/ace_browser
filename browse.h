@@ -197,9 +197,9 @@ char *render_page(struct html_element *html, struct html_element *body);
 char *render_html_file(char *filename, char *output_filename);
 
 /* Global Variables */
-char *file;
-char *output;
-char *output_temp;
-size_t output_size;
+extern char *file;
+extern char *output;
+extern char *output_temp;
+extern size_t output_size;
 
-struct html_element *html;
+extern struct html_element *html;

@@ -240,10 +240,15 @@ int main(int argc, char *argv[]) {
 					//printw("Enter");
 					selected = search_html_xy(html,scroll_x + x, scroll_y + y);
 					if (selected != NULL) {
-						endwin();
-						printf("%s\n",html_element_index_names[selected->tag]);
-						printf("innertext: '%s'\n",selected->innertext);
-						exit(0);
+						switch (selected->tag) {
+						case ELEMENT_A:
+							endwin();
+							printf("%s\n",html_element_index_names[selected->tag]);
+							printf("innertext: '%s'\n",selected->innertext);
+							exit(0);
+						default:
+							break;
+						}
 					}
 					break;
 				case KEY_UP:
