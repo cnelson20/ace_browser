@@ -178,6 +178,7 @@ void free_html_element(struct html_element *html);
 
 char gen_console_attributes_char(struct html_element *html);
 
+int stricmp(const char *s1, const char *s2);
 int min(int a, int b);
 void *minpointer_nnull(void *a, void *b);
 int is_whitespace_char(int c);

@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "browse.h"
+#include <ctype.h>
 
 char html_element_index_names[][16] = {
 "html",  // 0
@@ -357,6 +358,19 @@ char *render_page(struct html_element *html, struct html_element *body) {
 	
 	return output_temp;
 }
+
+/* 
+   Compares strings discarding case 
+*/
+int stricmp(const char *s1, const char *s2) {
+   while (toupper(*s1) == toupper(*s2)) {
+     if (*s1 == 0)
+       return 0;
+     s1++;
+     s2++;
+   }
+   return toupper(*(unsigned const char *)s1) - toupper(*(unsigned const char *)(s2));
+ }
 
 /* 
 	returns the minimum of two ints

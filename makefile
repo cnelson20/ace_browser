@@ -1,4 +1,4 @@
-all: download console
+all: console
 
 console: console.o browse.o download.o
 	gcc console.o browse.o download.o -o console -lncurses

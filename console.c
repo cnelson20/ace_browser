@@ -175,14 +175,32 @@ int main(int argc, char *argv[]) {
 	int i, fd , is_not_firstloop;
 	char **lines;
 
-	/* Download file */
-	get_site_path_from_url(argv[1],&site,&path);
+	if (stricmp(argv[1],"-f")) {
+	    /* Download file */
+	    get_site_path_from_url(argv[1],&site,&path);
+	} else if (stricmp(argv[1],"-s")) {
+ 	    site = malloc(strlen(argv[2]) + 1);
+	    strcpy(site,argv[2]);
+	    path = malloc(strlen(argv[3]) + 1);
+	    strcpy(path,argv[3]);	    
+	} else {
+ 	    site = malloc(strlen("_file") + 1);
+	    strcpy(site,"_file");
+	    path = malloc(strlen(argv[2]) + 1);
+	    strcpy(path,argv[2]);
+	}
 
  Test_Label:
 	;
 	
-	char *dwld_file = curl(site,path,1,NULL);
-	
+	char *dwld_file;
+	if (stricmp(site,"_file")) {
+	    dwld_file = curl(site,path,1,NULL);
+	} else {
+	    dwld_file = malloc(strlen(path) + 1);
+	    strcpy(dwld_file,path);
+	}
+	  
 	printf("site: '%s', path: '%s'\n",site,path);
 	/* 
 		Render the html page
