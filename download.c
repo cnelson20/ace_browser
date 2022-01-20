@@ -91,7 +91,7 @@ char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **for
 	return filename_tosave;
 }
 
-struct form_args_holder *post_check(struct html_element * current, struct html_element * form ,struct form_args_holder *gen) {
+char** post_check(struct html_element * current, struct html_element * form, ) {
 	if(current == form) {
 		if (current->num_children != 0 && current->tag == ELEMENT_FORM) {
 			int i;		
