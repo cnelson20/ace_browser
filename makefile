@@ -1,10 +1,4 @@
 all: download console
-	
-download: download.o
-	gcc -o download download.o
-
-download.o: download.c
-	gcc -c download.c
 
 console: console.o browse.o download.o
 	gcc console.o browse.o download.o -o console -lncurses
@@ -14,6 +8,9 @@ console.o: console.c browse.h
 
 browse.o: browse.c browse.h
 	gcc -c browse.c
+
+download.o: download.c
+	gcc -c download.c
 
 clean:
 	rm *.o
