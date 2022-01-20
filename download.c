@@ -91,7 +91,7 @@ char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **for
 	return filename_tosave;
 }
 
-char** post_check(struct html_element * current, struct html_element * form, ) {
+struct form_args_holder *post_check(struct html_element * current, struct html_element * form ,struct form_args_holder *gen) {
 	if(current == form) {
 		if (current->num_children != 0 && current->tag == ELEMENT_FORM) {
 			int i;		
@@ -107,7 +107,10 @@ char** post_check(struct html_element * current, struct html_element * form, ) {
 			}
 		}
 		if(IMPORTANT(current->tag)) {
-			printf("%d\n",current->tag);
+			gen->args=realloc(gen->args,sizeof(char*) * (gen->length + 2));
+			//copy name and value to gen->args[gen->length] 
+			gen->length++;
+			gen->args[gen->length] = NULL;
 		}
 	}
 	return NULL;
