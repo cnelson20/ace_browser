@@ -175,8 +175,12 @@ int main(int argc, char *argv[]) {
 	int i, fd , is_not_firstloop;
 	char **lines;
 
-	/* Download( file */
+	/* Download file */
 	get_site_path_from_url(argv[1],&site,&path);
+
+ Test_Label:
+	;
+	
 	char *dwld_file = curl(site,path,1,NULL);
 	
 	printf("site: '%s', path: '%s'\n",site,path);
@@ -279,16 +283,34 @@ int main(int argc, char *argv[]) {
 							  	static_tolowern(tempproperties,5);
 							  	printf("5 bytes: '%s'\n",static_tolower_string);
 							  	if (!memcmp(static_tolower_string,tempproperties,5)) {
-								  	long int href_length = (mystrchrnul(tempproperties+5,' ') - 1) - (strstr(tempproperties,"=\"") + 2);
-								  	char *href = malloc(href_length);
-								  	strncpy(href,strstr(tempproperties,"=\"")+2,href_length);
-								  	printf("Found!: %ld, href=\'%s\'\n",href_length,href);
-								  	if (strstr(href,"://")) {
-										  strcpy(href,strstr(href,"://")+strlen("://")) {
-											  
-										  }
-									  }
-								  	break;
+								  long int href_length = (mystrchrnul(tempproperties+6,*(tempproperties + 5))) - (strstr(tempproperties,"=\"") + 2);
+								    printf("tempproperties: '%s'\n",tempproperties);
+								    printf("c: %c c2: %c href_length: %ld\n",*(tempproperties + 5),*mystrchrnul(tempproperties+6,*(tempproperties + 5)),href_length);
+								    char *href = malloc(href_length + 1);
+								    strncpy(href,strchr(tempproperties,'=')+2,href_length);
+								    *(href + href_length) = '\0';
+								    printf("Found!: %ld, href=\'%s\'\n",href_length,href);
+								    if (strstr(href,"://")) {
+								        strcpy(href,strstr(href,"://")+ 3/*strlen("://")*/);
+									free(site);
+									free(path);
+									get_site_path_from_url(href,&site,&path);
+								    } else if (*href == '/') {
+								        free(path);
+									path = malloc(strlen(href) + 1);
+									strcpy(path,href);
+								    } else {
+								        if (*(mystrchrnul(path,'\0') - 1) != '/') {
+									    *strchr(path,'/') = '\0';
+									}
+									path = realloc(path, strlen(path) + href_length + 1);
+									strcat(path,href);
+								    }
+								    printf("new site: '%s'  new path: '%s'\n",site,path);
+								    free(href);
+								    /* This is sketch */
+								    goto Test_Label;
+								    break;
 							  }
 							  tempproperties++;
 							}
