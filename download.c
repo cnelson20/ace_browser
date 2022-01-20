@@ -107,7 +107,10 @@ struct form_args_holder *post_check(struct html_element * current, struct html_e
 			}
 		}
 		if(IMPORTANT(current->tag)) {
-			printf("%d\n",current->tag);
+			gen->args=realloc(gen->args,sizeof(char*) * (gen->length + 2));
+			//copy name and value to gen->args[gen->length] 
+			gen->length++;
+			gen->args[gen->length] = NULL;
 		}
 	}
 	return NULL;
