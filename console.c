@@ -12,6 +12,14 @@
 
 extern char html_element_index_names[][16];
 
+char *mystrchrnul(const char *s, int c) {
+	char *r = strchr(s,c);
+	if (r) {return r;}
+	else {
+		return (char *)s + strlen(s);
+	}
+}
+
 int strlen_special(char *s) {
 	int i = 0;
 	while (*s) {
@@ -167,7 +175,7 @@ int main(int argc, char *argv[]) {
 	int i, fd , is_not_firstloop;
 	char **lines;
 
-	/* Download file */
+	/* Download( file */
 	get_site_path_from_url(argv[1],&site,&path);
 	char *dwld_file = curl(site,path,1,NULL);
 	
@@ -268,16 +276,19 @@ int main(int argc, char *argv[]) {
 						    endwin();
 							char *tempproperties = selected->properties;
 							while (*(tempproperties + 4 /* strlen("href=") - 1 */)) {
-							  static_tolowern(tempproperties,5);
-							  printf("5 bytes: '%s'\n",static_tolower_string);
-							  if (!memcmp(static_tolower_string,tempproperties,5)) {
-								  printf("malloc\n");
-								  char *href = malloc(strchr(tempproperties+5,' ') - tempproperties - 5 + 1);
-								  printf("strncpy\n");
-								  strncpy(href,strchr(tempproperties,'=')+1,strchr(tempproperties,' ') - strchr(tempproperties,'='));
-								  printf("printf\n");
-								  printf("Found!: %d, href=\"%s\"\n",strchr(tempproperties,' ') - strchr(tempproperties,'='), href);
-								  break;
+							  	static_tolowern(tempproperties,5);
+							  	printf("5 bytes: '%s'\n",static_tolower_string);
+							  	if (!memcmp(static_tolower_string,tempproperties,5)) {
+								  	long int href_length = (mystrchrnul(tempproperties+5,' ') - 1) - (strstr(tempproperties,"=\"") + 2);
+								  	char *href = malloc(href_length);
+								  	strncpy(href,strstr(tempproperties,"=\"")+2,href_length);
+								  	printf("Found!: %ld, href=\'%s\'\n",href_length,href);
+								  	if (strstr(href,"://")) {
+										  strcpy(href,strstr(href,"://")+strlen("://")) {
+											  
+										  }
+									  }
+								  	break;
 							  }
 							  tempproperties++;
 							}
