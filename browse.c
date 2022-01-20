@@ -571,7 +571,7 @@ char *render_html_file(char *filename, char *output_filename) {
 		}
 	}
 	
-	print_html_structure(html,1);
+	//print_html_structure(html,1);
 	
 	printf("\n------------------------\n");
 	test_print_structure(html);
