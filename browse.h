@@ -157,6 +157,11 @@
 #define DC3 0x13
 #define DC4 0x14
 
+struct key_value_pair {
+	char *key;
+	char *value;
+};
+
 struct html_element {
 	struct html_element *parent;
 	struct html_element **children;
@@ -166,7 +171,9 @@ struct html_element {
 	char *innertext;
 	int innertext_length;
 	int innertext_size;
-	char *properties;
+
+	struct key_value_pair **properties;
+	int properties_length;
 	
 	int lx,ly,rx,ry;
 };

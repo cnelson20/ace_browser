@@ -482,8 +482,7 @@ int main(int argc, char *argv[]) {
 	getch();
 	endwin();
 	
-	print_html_element_xy(html);
-	printf("ch: %d\n",ch);
+	print_html_structure(html, 1);
 	
 	free_html_element(html);
 	free(lines);
