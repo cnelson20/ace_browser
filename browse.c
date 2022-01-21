@@ -174,11 +174,34 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 	html->tag = element_i;
 	
 	if (strchr(def,' ') < strchr(def,'>')) {
-		char *copyfrom = strchr(def,' ') +1;
-		html->properties = malloc(min(strlen(copyfrom), strchr(copyfrom,'>') - copyfrom));
-		strncpy(html->properties,copyfrom, min(strlen(copyfrom),strchr(copyfrom,'>') - copyfrom));
+		char *copyfrom = strchr(def,' ') + 1;
+		html->properties = malloc(0);
+		html->properties_length = 0;
+		while (1) {
+			if (*copyfrom == '>' || !strchr(copyfrom,'=')) {break;}
+
+			html->properties = realloc(html->properties, sizeof(struct key_value_pair *) * (1 + html->properties_length));
+			html->properties[html->properties_length] = malloc(sizeof(struct key_value_pair));
+			char *property_name_end = strchr(copyfrom,'=');
+			*property_name_end = '\0';
+			html->properties[html->properties_length]->key = malloc(strlen(copyfrom) + 1);
+			strcpy(html->properties[html->properties_length]->key,copyfrom);
+			*property_name_end = '=';
+			copyfrom = minpointer_nnull(strchr(property_name_end, '"'),strchr(property_name_end,'\''));
+			char quote_type = *copyfrom;
+			copyfrom++; 
+			int value_length = strchr(copyfrom,quote_type) - copyfrom;
+			html->properties[html->properties_length]->value = malloc(value_length + 1);
+			memcpy(html->properties[html->properties_length]->value, copyfrom, value_length);
+			*(html->properties[html->properties_length]->value + value_length) = '\0';
+
+			html->properties_length++;
+		}	
+		//html->properties = malloc(min(strlen(copyfrom), strchr(copyfrom,'>') - copyfrom));
+		//strncpy(html->properties,copyfrom, min(strlen(copyfrom),strchr(copyfrom,'>') - copyfrom));
 	} else {
-		html->properties = NULL;	
+		html->properties = NULL;
+		html->properties_length = 0;	
 	}
 		
 	return 0;
@@ -200,7 +223,15 @@ void free_html_element(struct html_element *html) {
 	}
 	
 	//printf("freeing %s->properties: '%s'\n",html_element_index_names[html->tag],html->properties);
-	free(html->properties);
+	if (html->properties != NULL) {
+		int i;
+		for (i = 0; i < html->properties_length; i++) {
+			free(html->properties[i]->key);
+			free(html->properties[i]->value);
+			free(html->properties[i]);
+		}
+		free(html->properties);
+	}
 	//printf("freeing %s->innertext: '%s'\n",html_element_index_names[html->tag],html->innertext);
 	free(html->innertext);
 	
@@ -227,7 +258,13 @@ char gen_console_attributes_char(struct html_element *html) {
 void print_html_structure(struct html_element *html, unsigned char rec) {
 	printf("------------------------\n");
 	printf("Element: Tag: (%d) %s\n",html->tag,html_element_index_names[html->tag]);
-	printf("Properties: '%s'\n",html->properties);
+	if (html->properties != NULL) {
+		int i;
+		for (i = 0; i < html->properties_length; i++) {
+			printf("Property (%d): '%s' = '%s'\n",i,html->properties[i]->key, html->properties[i]->value);
+		}
+		free(html->properties);
+	}
 	printf("innerHTML: '%s'\n",html->innertext);
 	
 	if (html->parent != NULL) {
