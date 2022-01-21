@@ -402,19 +402,19 @@ int is_whitespace_char(int c) {
 */
 char static_tolower_string[100];
 char *static_tolowern(char *string, size_t n) {
-	char *t;
-	strncpy(static_tolower_string,string,min(sizeof(static_tolower_string)-1,n));
-	if (strlen(string) > n) {
-		static_tolower_string[n] = '\0';
+    char *t = static_tolower_string;
+    strncpy(static_tolower_string,string,min(sizeof(static_tolower_string)-1,n));
+    if (strlen(string) > n) {
+        static_tolower_string[n] = '\0';
+    }
+    while (*t) {
+        if (*t >= 'A' && *t <= 'Z') {
+	    *t = *t + ('a' - 'A');
 	}
-	while (*t) {
-		if (*t >= 'A' && *t <= 'Z') {
-			*t = *t + ('a' - 'A');
-		}
-		t++;
-	}
-	
-	return static_tolower_string;
+	t++;
+    }
+    
+    return static_tolower_string;
 }
 /* 
 	Calls static_tolowern with n as strlen(string) + 1
