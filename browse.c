@@ -473,6 +473,10 @@ char *get_default_innerhtml(int tag) {
 
 char *render_html_file(char *filename, char *output_filename) {
 	struct stat fileinfo;
+
+	if (html) {
+	    free_html_element(html);
+	}
 	
 	stat(filename,&fileinfo);
 	int fd = open(filename, O_RDONLY);
@@ -490,13 +494,13 @@ char *render_html_file(char *filename, char *output_filename) {
 	while (1) {
 		cur = strchr(cur,'<');	
 		static_tolowern(cur+1,4);
-		if (!strcmp(static_tolower_string,"html")) {
+		if (!stricmp(static_tolower_string,"html")) {
 			break;
 		} else {
 			cur++;
 		}
 	}
-	if (!strcmp(static_tolower_string,"html")) {
+	if (!stricmp(static_tolower_string,"html")) {
 		html = calloc(1,sizeof(struct html_element));
 		//printf("cur: '%s'\n",cur);
 		init_html_element(html,NULL,cur+1,strchr(cur+1,'>') - (cur+1));

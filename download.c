@@ -42,7 +42,7 @@ char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **for
 
 	printf("filename_tosave: '%s'\n",filename_tosave);
 	
-	char **toexec = malloc(10*sizeof(char *));
+	char **toexec = malloc(11*sizeof(char *));
 	toexec[0] = curl_strings[0]; // curl
 	toexec[1] = fullname; // site.com/file.html
 	toexec[2] = curl_strings[3]; // -o
@@ -115,10 +115,3 @@ struct form_args_holder *post_check(struct html_element * current, struct html_e
 	}
 	return NULL;
 }
-
-/*
-int main(int argc, char *argv[]) {
-  free(curl(argv[1],argv[2],1, NULL));
-}
-*/
-
