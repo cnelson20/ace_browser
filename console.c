@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
 	  printf("Error locating file, reason: '%s'\nthe requested URL might not exist, check that\n",strerror(errno));
 	  exit(1);
 	}
-	render_html_file(dwld_file,"output.dat");
+	render_html_file(dwld_file, NULL); //"output.dat");
 	/* This would read from a file 
 	stat(argv[1],&std);
 	fd = open(argv[1], O_RDONLY);
@@ -326,8 +326,19 @@ int main(int argc, char *argv[]) {
 								    } else if (*href == '/') {
 								        printf("Using absolute pathing\n");
 								        free(path);
-									path = malloc(strlen(href) + 1);
-									strcpy(path,href);
+									if (strcmp(site,"_file")) {
+									    // Not local file
+									    path = malloc(strlen(href) + 1);
+									    strcpy(path,href);
+									} else {
+									    path = malloc(strlen(href) + 2 /* 1 + strlen(".") */);
+									    strcpy(path,".");
+									    strcat(path,href);
+									    if (*(path + strlen(path) - 1) == '/') {
+									        path = realloc(path,strlen(path) + strlen("index.html") + 1);
+										strcat(path,"index.html");
+									    }
+									}
 								    } else {
 								        printf("Relative pathing\n");
 									if (*(path + strlen(path) - 1) != '/') {
