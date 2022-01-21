@@ -82,6 +82,7 @@ void set_attributes(unsigned char i) {
 void print_html_element_xy(struct html_element *html) {
 	printf("------------------------\n");
 	printf("Element: Tag: (%d) %s\n",html->tag,html_element_index_names[html->tag]);
+	printf("Parent: '%s'\n", html->parent != NULL ? html_element_index_names[html->parent->tag] : NULL);
 	printf("innerHTML: '%s'\n",html->innertext);
 	printf("lx: %d  ly: %d\n",html->lx,html->ly);
 	printf("rx: %d  ry: %d\n",html->rx,html->ry);
@@ -122,46 +123,52 @@ struct html_element *search_html_xy(struct html_element *html, int x, int y) {
 int set_dims_x = 0;
 int set_dims_y = 0;
 char *html_set_dims(struct html_element *elem, char *text) {
-	int child_no = 0;
-	
-	if (DONTPRINT(elem->tag)) {return text - 1;}
-	
-	elem->lx = set_dims_x;
-	elem->ly = set_dims_y;
-	
-	//printf("\nelem: %p\n",elem);
-	//printf("lx: %d  ly: %d\n",set_dims_x, set_dims_y);
-	//print_html_structure(elem, 0);
-	
-	while(*text) {
-		//printf("0x%hhx 0x%hhx 0x%hhx 0x%hhx\n",*text,*(text+1),*(text+2),*(text+3));
-		
-		switch (*text) {
-			case DC1:
-				//printf("%s: calling child\n", html_element_index_names[elem->tag]);
-				text = html_set_dims(elem->children[child_no++],text+2);
-				text++;
-				//if (child_no >= elem->num_children) { return text; }
-				break;
-			case DC2:
-				elem->rx = set_dims_x;
-				elem->ry = set_dims_y;
-				//print_element_path(elem);
-				//printf("lx: %d  ly: %d\nrx: %d  ry: %d\n", elem->lx, elem->ly, set_dims_x, set_dims_y);
-				return text;
-			case '\n':
-				set_dims_y++;
-				set_dims_x = 0;
-				text++;
-				break;
-			default:
-				set_dims_x++;
-				text++;
-				break;
-		}
+    int child_no = 0;
+
+    //if (elem == NULL) {return text;}
+    if (DONTPRINT(elem->tag)) {return text - 1;}
+    
+    elem->lx = set_dims_x;
+    elem->ly = set_dims_y;
+    
+    //printf("\nelem: %p\n",elem);
+    //printf("lx: %d  ly: %d\n",set_dims_x, set_dims_y);
+    //print_html_structure(elem, 0);
+    
+    while(*text) {
+        //printf("0x%hhx 0x%hhx 0x%hhx 0x%hhx\n",*text,*(text+1),*(text+2),*(text+3));
+      
+        switch (*text) {
+	case DC1:
+	    //printf("%s: calling child\n", html_element_index_names[elem->tag]);
+	    if (child_no >= elem->num_children) {
+	        text = html_set_dims(elem->children[child_no++],text+2);
+	    } else {
+	      printf("Error: '%s' too many children? should have %d\n",html_element_index_names[elem->tag],elem->num_children);
+	      text = strchr(text,DC2)+1;
+	    }
+	    text++;
+	    //if (child_no >= elem->num_children) { return text; }
+	    break;
+	case DC2:
+	    elem->rx = set_dims_x;
+	    elem->ry = set_dims_y;
+	    //print_element_path(elem);
+	    //printf("lx: %d  ly: %d\nrx: %d  ry: %d\n", elem->lx, elem->ly, set_dims_x, set_dims_y);
+	    return text;
+	case '\n':
+	    set_dims_y++;
+	    set_dims_x = 0;
+	    text++;
+	    break;
+	default:
+	    set_dims_x++;
+	    text++;
+	    break;
 	}
+    }
 	
-	return text;
+    return text;
 }
 
 int main(int argc, char *argv[]) {
@@ -216,7 +223,7 @@ int main(int argc, char *argv[]) {
 	  printf("Error locating file, reason: '%s'\nthe requested URL might not exist, check that\n",strerror(errno));
 	  exit(1);
 	}
-	render_html_file(dwld_file, NULL); //"output.dat");
+	render_html_file(dwld_file, "output.dat");
 	/* This would read from a file 
 	stat(argv[1],&std);
 	fd = open(argv[1], O_RDONLY);
