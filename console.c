@@ -5,6 +5,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <ctype.h>
+
 #include "browse.h"
 #include "download.h"
 
@@ -175,20 +178,21 @@ int main(int argc, char *argv[]) {
 	int i, fd , is_not_firstloop;
 	char **lines;
 
-	if (stricmp(argv[1],"-f")) {
-	    /* Download file */
-	    get_site_path_from_url(argv[1],&site,&path);
-	} else if (stricmp(argv[1],"-s")) {
+	if (!stricmp(argv[1],"-f")) {
+	    site = malloc(strlen("_file") + 1);
+	    strcpy(site,"_file");
+	    path = malloc(strlen(argv[2]) + 1);
+	    strcpy(path,argv[2]);
+	} else if (!stricmp(argv[1],"-s")) {
  	    site = malloc(strlen(argv[2]) + 1);
 	    strcpy(site,argv[2]);
 	    path = malloc(strlen(argv[3]) + 1);
 	    strcpy(path,argv[3]);	    
 	} else {
- 	    site = malloc(strlen("_file") + 1);
-	    strcpy(site,"_file");
-	    path = malloc(strlen(argv[2]) + 1);
-	    strcpy(path,argv[2]);
+	    /* Download file */
+	    get_site_path_from_url(argv[1],&site,&path);
 	}
+	printf("site: '%s'  path: '%s'\n",site,path);
 
  Test_Label:
 	;
@@ -207,6 +211,11 @@ int main(int argc, char *argv[]) {
 		gets saved to output
 		html is the parent for the whole page
 	*/
+
+	if (stat(dwld_file,&std) == -1) {
+	  printf("Error locating file, reason: '%s'\nthe requested URL might not exist, check that\n",strerror(errno));
+	  exit(1);
+	}
 	render_html_file(dwld_file,"output.dat");
 	/* This would read from a file 
 	stat(argv[1],&std);
@@ -309,20 +318,32 @@ int main(int argc, char *argv[]) {
 								    *(href + href_length) = '\0';
 								    printf("Found!: %ld, href=\'%s\'\n",href_length,href);
 								    if (strstr(href,"://")) {
+								        printf("New site (possibly)!\n");
 								        strcpy(href,strstr(href,"://")+ 3/*strlen("://")*/);
 									free(site);
 									free(path);
 									get_site_path_from_url(href,&site,&path);
 								    } else if (*href == '/') {
+								        printf("Using absolute pathing\n");
 								        free(path);
 									path = malloc(strlen(href) + 1);
 									strcpy(path,href);
 								    } else {
-								        if (*(mystrchrnul(path,'\0') - 1) != '/') {
-									    *strchr(path,'/') = '\0';
+								        printf("Relative pathing\n");
+									if (*(path + strlen(path) - 1) != '/') {
+									    if (!strcmp(site,"_file") && !strchr(path,'/')) {
+									        printf("File relative pathing\n");
+									        *path = '\0';
+									    } else {
+									        *strchr(path,'/') = '\0';
+									    }
 									}
 									path = realloc(path, strlen(path) + href_length + 1);
 									strcat(path,href);
+									if (!strcmp(site,"_file") && *(path + strlen(path) - 1) == '/') {
+									    path = realloc(path,strlen(path) + strlen("index.html") + 1);
+									    strcat(path,"index.html");
+									}
 								    }
 								    printf("new site: '%s'  new path: '%s'\n",site,path);
 								    free(href);
