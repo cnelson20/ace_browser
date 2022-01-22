@@ -309,38 +309,19 @@ int main(int argc, char *argv[]) {
 			struct html_element *selected;
 			switch (ch) {
 				case '\n':
-					printw("bt");
-					refresh();
 					selected = search_html_xy(html,scroll_x + x, scroll_y + y);
-					printw("at");
-					refresh();
 					if (selected != NULL) {
 						switch (selected->tag) {
-						case ELEMENT_A:
-						    endwin();
-							char *href = NULL;
-							int i;
-							/*
-							for (i = 0; i < selected->properties_length; i++) {
-								if (!strcmp("href",selected->properties[i]->key)) {
-									href = malloc(strlen(selected->properties[i]->value) + 1);
-									strcpy(href, selected->properties[i]->value);
-
-									break;
-								}
-							} 
-							free(href);
-							*/
-							printf("new site: '%s'  new path: '%s'\n",site,path);
-						    exit(0);
-						    break;
-						default:
-							break;
+							default:
+								break;
 						}
+						endwin();
+						printf("%s\n",html_element_index_names[selected->tag]);
+						printf("innertext: '%s'\n",selected->innertext);
+						exit(0);
+					} else {
+						printw("nul");
 					}
-					printf("%s\n",html_element_index_names[selected->tag]);
-					printf("innertext: '%s'\n",selected->innertext);
-					exit(0);
 					break;
 				case KEY_UP:
 					if (y == 0) {
