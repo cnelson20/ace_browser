@@ -110,10 +110,26 @@ struct form_args_holder *post_check(struct html_element * current, struct html_e
 			gen->args=realloc(gen->args,sizeof(char*) * (gen->length + 2));
 			//copy name and value to gen->args[gen->length] 
 			//for name
-
+			char* tempname = NULL;
+			char* tempvalue = NULL;
+			int i = 0;
+			for(int i = 0; i < current->properties_length; i++) {
+				if(!stricmp(current->properties[i]->key,"name")) {
+					tempname = current->properties[i]->value;
+					break;
+				}
+				if(!stricmp(current->properties[i]->key,"value")) {
+					tempvalue = current->properties[i]->value;
+					break;
+				}
+			}
+			char *returnstring = malloc(strlen(tempname) + strlen(tempvalue) + 2);
+			strcpy(returnstring,tempname);
+			strcat(returnstring,"=");
+			strcat(returnstring,tempvalue);
 			// end 
 			gen->length++;
-			gen->args[gen->length] = NULL;
+			gen->args[gen->length] = returnstring;
 		}
 	}
 	return NULL;
