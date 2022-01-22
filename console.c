@@ -309,14 +309,18 @@ int main(int argc, char *argv[]) {
 			struct html_element *selected;
 			switch (ch) {
 				case '\n':
+					printw("bt");
+					refresh();
 					selected = search_html_xy(html,scroll_x + x, scroll_y + y);
+					printw("at");
+					refresh();
 					if (selected != NULL) {
 						switch (selected->tag) {
 						case ELEMENT_A:
 						    endwin();
-							exit(0);
-							char *href;
+							char *href = NULL;
 							int i;
+							/*
 							for (i = 0; i < selected->properties_length; i++) {
 								if (!strcmp("href",selected->properties[i]->key)) {
 									href = malloc(strlen(selected->properties[i]->value) + 1);
@@ -325,24 +329,13 @@ int main(int argc, char *argv[]) {
 									break;
 								}
 							} 
-							if (strstr(href,"://")) {
-								printf("New site (possibly)!\n");
-								
-							} else if (*href == '/') {
-								printf("Using absolute pathing\n");
-								if (strcmp(site,"_file")) {
-									// Not local file
-								} else {
-									// Local file
-								}
-							} else {
-								printf("Relative pathing\n");
-							}
+							free(href);
+							*/
 							printf("new site: '%s'  new path: '%s'\n",site,path);
-						    free(href);
-						    /* This is sketch */
-						    goto Test_Label;
+						    exit(0);
 						    break;
+						default:
+							break;
 						}
 					}
 					printf("%s\n",html_element_index_names[selected->tag]);
