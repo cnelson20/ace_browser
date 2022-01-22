@@ -57,3 +57,6 @@ download
 console
 # files/ subdirectory
 files/*
+# program used files
+output.dat
+cookies.txt
