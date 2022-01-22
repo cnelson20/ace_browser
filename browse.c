@@ -173,6 +173,11 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 	if (element_i == -1) {return -1;}
 	html->tag = element_i;
 	
+	html->lx = -1;
+	html->ly = -1;
+	html->rx = -1;
+	html->ry = -1;
+
 	if (strchr(def,' ') < strchr(def,'>')) {
 		char *copyfrom = strchr(def,' ') + 1;
 		html->properties = malloc(0);
@@ -186,6 +191,7 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 			*property_name_end = '\0';
 			html->properties[html->properties_length]->key = malloc(strlen(copyfrom) + 1);
 			strcpy(html->properties[html->properties_length]->key,copyfrom);
+			tolower_inplace(html->properties[html->properties_length]->key);
 			*property_name_end = '=';
 			copyfrom = minpointer_nnull(strchr(property_name_end, '"'),strchr(property_name_end,'\''));
 			char quote_type = *copyfrom;
@@ -195,6 +201,7 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 			memcpy(html->properties[html->properties_length]->value, copyfrom, value_length);
 			*(html->properties[html->properties_length]->value + value_length) = '\0';
 
+			copyfrom += value_length + 1;
 			html->properties_length++;
 		}	
 		//html->properties = malloc(min(strlen(copyfrom), strchr(copyfrom,'>') - copyfrom));
@@ -210,10 +217,7 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 /*
 	Frees a html element recursively
 */
-void free_html_element(struct html_element *html) {
-	//printf("html addr: %p\n",html);
-	//printf("freeing '%s':\n",html_element_index_names[html->tag]);
-	
+void free_html_element(struct html_element *html) {	
 	if (html->num_children != 0) {
 		int i;
 		for (i = 0; i < html->num_children; i++) {
@@ -222,7 +226,6 @@ void free_html_element(struct html_element *html) {
 		free(html->children);
 	}
 	
-	//printf("freeing %s->properties: '%s'\n",html_element_index_names[html->tag],html->properties);
 	if (html->properties != NULL) {
 		int i;
 		for (i = 0; i < html->properties_length; i++) {
@@ -232,10 +235,8 @@ void free_html_element(struct html_element *html) {
 		}
 		free(html->properties);
 	}
-	//printf("freeing %s->innertext: '%s'\n",html_element_index_names[html->tag],html->innertext);
 	free(html->innertext);
 	
-	//printf("freeing '%s' itself:\n",html_element_index_names[html->tag]);
 	free(html);
 }
 
@@ -253,6 +254,19 @@ char gen_console_attributes_char(struct html_element *html) {
 }
 
 /* 
+	Print out an struct html_element's innertext replacing DEL characters with a baby emoji (symbolizes child)
+*/
+void print_innertext(char *s) {
+	while (*s) {
+		if (*s == 127) {
+			printf("👶");
+		} else {
+			putchar(*s);
+		}
+		s++;
+	}
+}
+/* 
 	Recursively prints out data of a html tree
 */
 void print_html_structure(struct html_element *html, unsigned char rec) {
@@ -263,10 +277,20 @@ void print_html_structure(struct html_element *html, unsigned char rec) {
 		for (i = 0; i < html->properties_length; i++) {
 			printf("Property (%d): '%s' = '%s'\n",i,html->properties[i]->key, html->properties[i]->value);
 		}
-		free(html->properties);
 	}
-	printf("innerHTML: '%s'\n",html->innertext);
-	
+	printf("innerHTML: '");
+	char *innertext_temp = html->innertext;
+	while (*innertext_temp) {
+		if (*innertext_temp == 127) {
+			printf("👶");
+		} else {
+			putchar(*innertext_temp);
+		}
+		innertext_temp++;
+	}
+	printf("'\n");
+	printf("lx: %d  ly: %d rx: %d  ry: %d\n\n", html->lx, html->ly, html->rx, html->ry);
+
 	if (html->parent != NULL) {
 		printf("Parent: %s\n",html_element_index_names[html->parent->tag]);
 	}
@@ -280,6 +304,8 @@ void print_html_structure(struct html_element *html, unsigned char rec) {
 				printf("%s\n",html_element_index_names[html->children[i]->tag]);
 			}
 		}
+	} else {
+		printf("No children\n");
 	}
 }
 
@@ -319,7 +345,9 @@ void test_print_structure(struct html_element *html) {
 }
 
 
-/* Kinda renders the html dir structure */
+/* 
+	Kinda renders the html dir structure 
+*/
 char *render_page(struct html_element *html, struct html_element *body) {
 	if (output == NULL) {
 		output_size = 1024;
@@ -410,6 +438,18 @@ int stricmp(const char *s1, const char *s2) {
  }
 
 /* 
+	Converts string to lowercase in-place (overwrites characters)
+*/
+void tolower_inplace(char *t) {
+	while (*t) {
+        if (*t >= 'A' && *t <= 'Z') {
+	    *t = *t + ('a' - 'A');
+	}
+	t++;
+    }
+}
+
+/* 
 	returns the minimum of two ints
 */
 int min(int a, int b) {
@@ -444,12 +484,7 @@ char *static_tolowern(char *string, size_t n) {
     if (strlen(string) > n) {
         static_tolower_string[n] = '\0';
     }
-    while (*t) {
-        if (*t >= 'A' && *t <= 'Z') {
-	    *t = *t + ('a' - 'A');
-	}
-	t++;
-    }
+    tolower_inplace(static_tolower_string);
     
     return static_tolower_string;
 }
@@ -566,8 +601,9 @@ char *render_html_file(char *filename, char *output_filename) {
 				elem->innertext[(elem->innertext_length)++] = 127;
 				elem->innertext[elem->innertext_length] = '\0';				
 				
-				elem->children = realloc(elem->children, (1+elem->num_children) * sizeof(struct html_element *));
+				elem->children = realloc(elem->children, (2+elem->num_children) * sizeof(struct html_element *));
 				elem->children[elem->num_children] = calloc(1,sizeof(struct html_element));
+				elem->children[elem->num_children + 1] = NULL;
 				
 				init_html_element(elem->children[elem->num_children],elem,cur+1,strchr(cur+1,'>') - (cur+1));
 				elem = elem->children[elem->num_children++];
@@ -645,11 +681,3 @@ char *render_html_file(char *filename, char *output_filename) {
 	output = realloc(output,strlen(output)+1);
 	return output;
 }
-
-/*
-int main(int argc, char *argv[]) {
-	if (argc <= 1) {printf("give file\n"); return 1;}
-	char *out = render_html_file(argv[1],argc >= 3 ? argv[2] : NULL);
-	free(out);
-}
-*/

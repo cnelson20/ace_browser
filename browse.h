@@ -189,6 +189,7 @@ int stricmp(const char *s1, const char *s2);
 int min(int a, int b);
 void *minpointer_nnull(void *a, void *b);
 int is_whitespace_char(int c);
+void tolower_inplace(char *t);
 
 char static_tolower_string[100];
 char *static_tolowern(char *string, size_t n);
