@@ -15,6 +15,9 @@
 
 extern char html_element_index_names[][16];
 
+/*
+	strchr, but if the find fails return the null byte at the end of s
+*/
 char *mystrchrnul(const char *s, int c) {
 	char *r = strchr(s,c);
 	if (r) {return r;}
@@ -23,6 +26,9 @@ char *mystrchrnul(const char *s, int c) {
 	}
 }
 
+/* 
+	strlen, ignoring DC1 ( and the succeeding character) and DC2 from parts of code
+*/
 int strlen_special(char *s) {
 	int i = 0;
 	while (*s) {
@@ -40,6 +46,9 @@ int strlen_special(char *s) {
 }
 
 int colors_array[] = {COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN};
+/*
+	Sets up ncurses colors
+*/
 void init_colors() {
   int i,j;
   for (j = 0; j < 8; j++) {
@@ -52,6 +61,11 @@ void init_colors() {
   //init_pair(1,COLOR_WHITE, COLOR_BLACK);
 }
 
+/*
+	Given a char[] link (a url),
+	malloc() space for site and path and set them correctly
+	Ex: get_site_path_from_url("google.com/search") => "google.com" , "/search"
+*/
 void get_site_path_from_url(char *link, char **site, char **path) {
 	if (strchr(link,'/')) {
 	  *path = malloc(strlen(strchr(link,'/')) + 1);
@@ -69,6 +83,9 @@ void get_site_path_from_url(char *link, char **site, char **path) {
    
 }
 
+/*
+	Sets ncurses attributes given i
+*/
 void set_attributes(unsigned char i) {
     int val = 0;
 	if (i & 64) {val |= A_UNDERLINE;}
@@ -79,23 +96,10 @@ void set_attributes(unsigned char i) {
 	//printw("%hhu",i);
 }
 
-void print_html_element_xy(struct html_element *html) {
-	printf("------------------------\n");
-	printf("Element: Tag: (%d) %s\n",html->tag,html_element_index_names[html->tag]);
-	printf("Parent: '%s'\n", html->parent != NULL ? html_element_index_names[html->parent->tag] : NULL);
-	printf("innerHTML: '%s'\n",html->innertext);
-	printf("lx: %d  ly: %d\n",html->lx,html->ly);
-	printf("rx: %d  ry: %d\n",html->rx,html->ry);
-	if (html->num_children != 0) {	
-		int i;
-		printf("---- Children (%d): ----\n",html->num_children);
-		for (i = 0; i < html->num_children; i++) {
-			print_html_element_xy(html->children[i]);
-		}
-		printf("------------------------\n");
-	}
-}
-
+/*
+	Searches a html tree for an element where x and y is within its bounds
+	TODO: Make this binary search
+*/
 struct html_element *search_html_xy(struct html_element *html, int x, int y) {
 	if (html->ly > y || html->ry < y) {
 		return NULL;
@@ -122,52 +126,52 @@ struct html_element *search_html_xy(struct html_element *html, int x, int y) {
 
 int set_dims_x = 0;
 int set_dims_y = 0;
+/* 
+	Sets the lx,ly,rx,ry fields of a html_element tree given text
+	
+	Note: always set_dims_x and set_dims_y to 0 before calling this function.
+*/
 char *html_set_dims(struct html_element *elem, char *text) {
     int child_no = 0;
 
-    //if (elem == NULL) {return text;}
-    if (DONTPRINT(elem->tag)) {return text - 1;}
-    
     elem->lx = set_dims_x;
     elem->ly = set_dims_y;
     
-    //printf("\nelem: %p\n",elem);
-    //printf("lx: %d  ly: %d\n",set_dims_x, set_dims_y);
-    //print_html_structure(elem, 0);
+	printf("html_set_dims: ");
+	print_element_path(elem);
     
-    while(*text) {
-        //printf("0x%hhx 0x%hhx 0x%hhx 0x%hhx\n",*text,*(text+1),*(text+2),*(text+3));
-      
+    while(*text) {    
         switch (*text) {
-	case DC1:
-	    //printf("%s: calling child\n", html_element_index_names[elem->tag]);
-	    if (child_no >= elem->num_children) {
-	        text = html_set_dims(elem->children[child_no++],text+2);
-	    } else {
-	      printf("Error: '%s' too many children? should have %d\n",html_element_index_names[elem->tag],elem->num_children);
-	      text = strchr(text,DC2)+1;
-	    }
-	    text++;
-	    //if (child_no >= elem->num_children) { return text; }
-	    break;
-	case DC2:
-	    elem->rx = set_dims_x;
-	    elem->ry = set_dims_y;
-	    //print_element_path(elem);
-	    //printf("lx: %d  ly: %d\nrx: %d  ry: %d\n", elem->lx, elem->ly, set_dims_x, set_dims_y);
-	    return text;
-	case '\n':
-	    set_dims_y++;
-	    set_dims_x = 0;
-	    text++;
-	    break;
-	default:
-	    set_dims_x++;
-	    text++;
-	    break;
-	}
+			case DC1:
+				while (elem->children[child_no] != NULL && DONTPRINT(elem->children[child_no]->tag)) {
+					child_no++;
+				}
+				if (elem->children[child_no] != NULL) {
+					text = html_set_dims(elem->children[child_no++],text+2);
+				} else {
+					//exit(0);
+					text++;
+				}
+				text++;
+				break;
+			case DC2:
+				elem->rx = set_dims_x;
+				elem->ry = set_dims_y;
+				return text;
+			case '\n':
+				set_dims_y++;
+				set_dims_x = 0;
+				text++;
+				break;
+			default:
+				set_dims_x++;
+				text++;
+				break;
+		}
     }
-	
+
+	elem->rx = set_dims_x;
+	elem->ry = set_dims_y;
     return text;
 }
 
@@ -235,7 +239,7 @@ int main(int argc, char *argv[]) {
 	temp = output;
 	set_dims_x = 0;
 	set_dims_y = 0;
-	html_set_dims(html,temp);
+	html_set_dims(html,strchr(output,DC1)+2);
 	
 	initscr();
 	raw();
@@ -305,79 +309,45 @@ int main(int argc, char *argv[]) {
 			struct html_element *selected;
 			switch (ch) {
 				case '\n':
-					move(scroll_y + y, scroll_x + x);
-					//printw("Enter");
 					selected = search_html_xy(html,scroll_x + x, scroll_y + y);
 					if (selected != NULL) {
 						switch (selected->tag) {
 						case ELEMENT_A:
 						    endwin();
-							char *tempproperties = selected->properties;
-							while (*(tempproperties + 4 /* strlen("href=") - 1 */)) {
-							  	static_tolowern(tempproperties,5);
-							  	printf("5 bytes: '%s'\n",static_tolower_string);
-							  	if (!memcmp(static_tolower_string,tempproperties,5)) {
-								  long int href_length = (mystrchrnul(tempproperties+6,*(tempproperties + 5))) - (strstr(tempproperties,"=\"") + 2);
-								    printf("tempproperties: '%s'\n",tempproperties);
-								    printf("c: %c c2: %c href_length: %ld\n",*(tempproperties + 5),*mystrchrnul(tempproperties+6,*(tempproperties + 5)),href_length);
-								    char *href = malloc(href_length + 1);
-								    strncpy(href,strchr(tempproperties,'=')+2,href_length);
-								    *(href + href_length) = '\0';
-								    printf("Found!: %ld, href=\'%s\'\n",href_length,href);
-								    if (strstr(href,"://")) {
-								        printf("New site (possibly)!\n");
-								        strcpy(href,strstr(href,"://")+ 3/*strlen("://")*/);
-									free(site);
-									free(path);
-									get_site_path_from_url(href,&site,&path);
-								    } else if (*href == '/') {
-								        printf("Using absolute pathing\n");
-								        free(path);
-									if (strcmp(site,"_file")) {
-									    // Not local file
-									    path = malloc(strlen(href) + 1);
-									    strcpy(path,href);
-									} else {
-									    path = malloc(strlen(href) + 2 /* 1 + strlen(".") */);
-									    strcpy(path,".");
-									    strcat(path,href);
-									    if (*(path + strlen(path) - 1) == '/') {
-									        path = realloc(path,strlen(path) + strlen("index.html") + 1);
-										strcat(path,"index.html");
-									    }
-									}
-								    } else {
-								        printf("Relative pathing\n");
-									if (*(path + strlen(path) - 1) != '/') {
-									    if (!strcmp(site,"_file") && !strchr(path,'/')) {
-									        printf("File relative pathing\n");
-									        *path = '\0';
-									    } else {
-									        *strchr(path,'/') = '\0';
-									    }
-									}
-									path = realloc(path, strlen(path) + href_length + 1);
-									strcat(path,href);
-									if (!strcmp(site,"_file") && *(path + strlen(path) - 1) == '/') {
-									    path = realloc(path,strlen(path) + strlen("index.html") + 1);
-									    strcat(path,"index.html");
-									}
-								    }
-								    printf("new site: '%s'  new path: '%s'\n",site,path);
-								    free(href);
-								    /* This is sketch */
-								    goto Test_Label;
-								    break;
-							  }
-							  tempproperties++;
-							}
-							printf("%s\n",html_element_index_names[selected->tag]);
-							printf("innertext: '%s'\n",selected->innertext);
 							exit(0);
-						default:
-							break;
+							char *href;
+							int i;
+							for (i = 0; i < selected->properties_length; i++) {
+								if (!strcmp("href",selected->properties[i]->key)) {
+									href = malloc(strlen(selected->properties[i]->value) + 1);
+									strcpy(href, selected->properties[i]->value);
+
+									break;
+								}
+							} 
+							if (strstr(href,"://")) {
+								printf("New site (possibly)!\n");
+								
+							} else if (*href == '/') {
+								printf("Using absolute pathing\n");
+								if (strcmp(site,"_file")) {
+									// Not local file
+								} else {
+									// Local file
+								}
+							} else {
+								printf("Relative pathing\n");
+							}
+							printf("new site: '%s'  new path: '%s'\n",site,path);
+						    free(href);
+						    /* This is sketch */
+						    goto Test_Label;
+						    break;
 						}
 					}
+					printf("%s\n",html_element_index_names[selected->tag]);
+					printf("innertext: '%s'\n",selected->innertext);
+					exit(0);
 					break;
 				case KEY_UP:
 					if (y == 0) {
