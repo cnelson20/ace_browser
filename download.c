@@ -79,6 +79,13 @@ char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **for
 	if (fork()) {
 		int childexitstatus;
 		wait(&childexitstatus);
+		if (!WIFEXITED(childexitstatus)) {
+			printf("curl did not exit properly. if this happens I imagine the url was wrong?\n");
+			exit(1);
+		} else if (WEXITSTATUS(childexitstatus) != 0) {
+			printf("curl failed. the url may have been misstyped or the requested page may not be available\n");
+			exit(1);
+		}
 	} else {
 		mkdir("files/", 0755);
 		execvp(toexec[0],toexec);
@@ -107,7 +114,6 @@ struct form_args_holder *post_check(struct html_element * current, struct html_e
 			}
 		}
 		if(IMPORTANT(current->tag)) {
-			gen->args=realloc(gen->args,sizeof(char*) * (gen->length + 2));
 			//copy name and value to gen->args[gen->length] 
 			//for name
 			char* tempname = NULL;
@@ -123,13 +129,19 @@ struct form_args_holder *post_check(struct html_element * current, struct html_e
 					break;
 				}
 			}
-			char *returnstring = malloc(strlen(tempname) + strlen(tempvalue) + 2);
-			strcpy(returnstring,tempname);
-			strcat(returnstring,"=");
-			strcat(returnstring,tempvalue);
-			// end 
-			gen->length++;
-			gen->args[gen->length] = returnstring;
+			if (tempname != NULL) {
+				char *returnstring = malloc(strlen(tempname) + (tempvalue ? strlen(tempvalue) : 0) + 2);
+				strcpy(returnstring,tempname);
+				strcat(returnstring,"=");
+				if (tempvalue) {
+					strcat(returnstring,tempvalue);
+				}
+				// end 
+				gen->args=realloc(gen->args,sizeof(char*) * (gen->length + 2));
+				gen->args[gen->length] = returnstring;
+				gen->length++;
+				gen->args[gen->length] = NULL;
+			}
 		}
 	}
 	return NULL;
