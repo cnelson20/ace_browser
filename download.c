@@ -110,25 +110,7 @@ struct form_args_holder *post_check(struct html_element * current, struct html_e
 			gen->args=realloc(gen->args,sizeof(char*) * (gen->length + 2));
 			//copy name and value to gen->args[gen->length] 
 			//for name
-			char* tempstring = malloc(512);
-			strncpy(tempstring, strstr(gen->properties,"name=")+5, 512);
-			char thingy = tempstring[0];
-			char * secondquote = strchr(tempstring+1, thingy);
-			int le = secondquote-tempstring+1;
-			char* inputstring;
-			memcpy(inputstring, tempstring, le);
-			inputstring[le]='=';
-			inputstring[le+1]='\0';
-			//for value
-			char* temp2string = malloc(512);
-			strncpy(temp2string, strstr(gen->innertext, "value=")+6,512);
-			char thing2y = temp2string[0];
-			char second2quote = strchr(temp2string+1, thing2y);
-			int le2 = second2quote - temp2string+1;
-			char* input2string;
-			memcpy(input2string, temp2string, le2);
-			intput2string[le2] = '\0';
-			strcat(intputstring, intput2string);
+
 			// end 
 			gen->length++;
 			gen->args[gen->length] = NULL;
