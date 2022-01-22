@@ -191,6 +191,7 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 			*property_name_end = '\0';
 			html->properties[html->properties_length]->key = malloc(strlen(copyfrom) + 1);
 			strcpy(html->properties[html->properties_length]->key,copyfrom);
+			strip_whitespace_inplace(html->properties[html->properties_length]->key);
 			tolower_inplace(html->properties[html->properties_length]->key);
 			*property_name_end = '=';
 			copyfrom = minpointer_nnull(strchr(property_name_end, '"'),strchr(property_name_end,'\''));
@@ -257,7 +258,11 @@ char gen_console_attributes_char(struct html_element *html) {
 	Print out an struct html_element's innertext replacing DEL characters with a baby emoji (symbolizes child)
 */
 void print_innertext(char *s) {
-	while (*s) {
+	if (s == NULL) {
+		printf("~~(null)~~");	
+		return;
+	}
+	while (s && *s) {
 		if (*s == 127) {
 			printf("👶");
 		} else {
@@ -279,15 +284,7 @@ void print_html_structure(struct html_element *html, unsigned char rec) {
 		}
 	}
 	printf("innerHTML: '");
-	char *innertext_temp = html->innertext;
-	while (*innertext_temp) {
-		if (*innertext_temp == 127) {
-			printf("👶");
-		} else {
-			putchar(*innertext_temp);
-		}
-		innertext_temp++;
-	}
+	print_innertext(html->innertext);
 	printf("'\n");
 	printf("lx: %d  ly: %d rx: %d  ry: %d\n\n", html->lx, html->ly, html->rx, html->ry);
 
@@ -436,6 +433,25 @@ int stricmp(const char *s1, const char *s2) {
    }
    return toupper(*(unsigned const char *)s1) - toupper(*(unsigned const char *)(s2));
  }
+
+/*
+	strips whitespace in a string in-place
+*/
+size_t strip_whitespace_inplace(char *s) {
+	size_t og_strlen = strlen(s);
+	while (*s) {
+		if (is_whitespace_char(*s)) {
+			char *t = s;
+			while (*t) {
+				*t = *(t + 1);
+				t++;
+			}
+		} else {
+			s++;
+		}
+	}
+	return og_strlen;
+}
 
 /* 
 	Converts string to lowercase in-place (overwrites characters)

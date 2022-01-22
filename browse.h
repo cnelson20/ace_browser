@@ -189,6 +189,7 @@ int stricmp(const char *s1, const char *s2);
 int min(int a, int b);
 void *minpointer_nnull(void *a, void *b);
 int is_whitespace_char(int c);
+size_t strip_whitespace_inplace(char *s);
 void tolower_inplace(char *t);
 
 char static_tolower_string[100];
@@ -200,6 +201,7 @@ unsigned char *geninquotes_html(char *html, size_t len);
 void print_element_path_nonewline(struct html_element *html);
 void print_element_path(struct html_element *html);
 void test_print_structure(struct html_element *html);
+void print_innertext(char *s);
 void print_html_structure(struct html_element *html, unsigned char rec);
 
 char *render_page(struct html_element *html, struct html_element *body);
