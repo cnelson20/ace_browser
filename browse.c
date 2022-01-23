@@ -163,27 +163,35 @@ int get_html_element_index(char *name) {
 	Note: does not setup innertext field,
 */
 int init_html_element(struct html_element *html, struct html_element *f_parent, char *def, size_t def_length) {
+	//printf("---- define html->parent ----\n");
 	html->parent = f_parent;
+	//printf("---- define html->children ----\n");
 	html->children = NULL;
+	//printf("---- define html->num_children ----\n");
 	html->num_children = 0;
 	
 	/* get tag name ('body', 'div', 'a', etc.) */
+	//printf("---- define html->tag ----\n");
 	static_tolowern(def,(char *)minpointer_nnull(strchr(def,' '),strchr(def,'>')) - def);
 	int element_i = get_html_element_index(static_tolower_string);
 	if (element_i == -1) {return -1;}
 	html->tag = element_i;
 	
+	//printf("---- define html->x y ----\n");
 	html->lx = -1;
 	html->ly = -1;
 	html->rx = -1;
 	html->ry = -1;
 
-	if (strchr(def,' ') < strchr(def,'>')) {
+	//printf("---- properties ----\n");
+	if (strchr(def,' ') != NULL && strchr(def,' ') < strchr(def,'>')) {
+		//printf("---- defining html->properties ----\n");
+		//printf("strchr ' ': %p  strchr '>': %p\n",strchr(def,' '),strchr(def,'>'));
 		char *copyfrom = strchr(def,' ') + 1;
 		html->properties = malloc(0);
 		html->properties_length = 0;
 		while (1) {
-			if (*copyfrom == '>' || !strchr(copyfrom,'=')) {break;}
+			if (*copyfrom == '>' || (*copyfrom == '/' && *(copyfrom+1) == '>') || !strchr(copyfrom,'=')) {break;}
 
 			html->properties = realloc(html->properties, sizeof(struct key_value_pair *) * (1 + html->properties_length));
 			html->properties[html->properties_length] = malloc(sizeof(struct key_value_pair));
@@ -208,10 +216,12 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 		//html->properties = malloc(min(strlen(copyfrom), strchr(copyfrom,'>') - copyfrom));
 		//strncpy(html->properties,copyfrom, min(strlen(copyfrom),strchr(copyfrom,'>') - copyfrom));
 	} else {
+		//printf("---- html->properties is null ----\n");
 		html->properties = NULL;
 		html->properties_length = 0;	
 	}
-		
+	//printf("---- end define ----\n");
+
 	return 0;
 }
 
@@ -294,6 +304,9 @@ void print_html_structure(struct html_element *html, unsigned char rec) {
 	if (html->num_children != 0) {
 		int i;		
 		printf("Children (%d):\n",html->num_children);
+		for (i = 0; i < html->num_children; i++) {
+			printf("[%d]:  %s\n",i,html_element_index_names[html->children[i]->tag]);
+		}
 		for (i = 0; i < html->num_children; i++) {
 			if (rec) {
 				print_html_structure(html->children[i],1);
@@ -490,7 +503,7 @@ int is_whitespace_char(int c) {
 }
 
 /* 
-	Copies n bytes of string to static_tolower_string (+ a null byte),
+	Copies n - 1 bytes of string to static_tolower_string (+ a null byte),
 	then converts it to lowercase
 */
 char static_tolower_string[100];
@@ -562,17 +575,21 @@ char *get_default_innerhtml(int tag) {
 char *render_html_file(char *filename, char *output_filename) {
 	struct stat fileinfo;
 
+	printf("---- render_html_file() ----\n");
 	if (html) {
 	    free_html_element(html);
 	}
 	
+	printf("---- reading from [downloaded] file ----\n");
 	stat(filename,&fileinfo);
 	int fd = open(filename, O_RDONLY);
 	if (fd == -1) {printf("fuck\n");}
 	file = malloc(fileinfo.st_size+1);
 	read(fd,file,fileinfo.st_size);
 	close(fd);
+	printf("---- done with file ----\n");
 	
+	printf("---- calling geninquotes_html() ----\n");
 	char *qts = geninquotes_html(file,strlen(file));
 	char *cur = file;
 	
@@ -606,9 +623,24 @@ char *render_html_file(char *filename, char *output_filename) {
 		cur++;
 	}
 	
-	while (elem != NULL && cur < file + strlen(file)) {
-		if (*cur == '<') {
-			if (*(cur+1) != '/') {
+	int strlen_file = strlen(file);
+	while (elem != NULL && cur < file + strlen_file) {
+		int de_cur_equals = (*cur == '<');
+		if (de_cur_equals) {
+			if (elem->tag == ELEMENT_SCRIPT) {
+			  	if (*(cur+1) == '/') {
+					static_tolowern(cur+2,strlen("script"));
+					printf("~~CUR~~: '%s'\n",static_tolower_string);
+					if (!strcmp(static_tolower_string,"script") && !qts[cur - file + 2]) {
+						elem = elem->parent;
+						cur = strchr(cur,'>')+1;
+					} else {
+						de_cur_equals = 0;
+					}
+			  	} else {
+					de_cur_equals = 0;
+			  	}
+			} else if (*(cur+1) != '/') {
 				/* new element */
 				if (elem->innertext_length >= elem->innertext_size - 1) {
 					elem->innertext = realloc(elem->innertext, elem->innertext_size * 2);
@@ -621,8 +653,12 @@ char *render_html_file(char *filename, char *output_filename) {
 				elem->children[elem->num_children] = calloc(1,sizeof(struct html_element));
 				elem->children[elem->num_children + 1] = NULL;
 				
-				init_html_element(elem->children[elem->num_children],elem,cur+1,strchr(cur+1,'>') - (cur+1));
+				if (init_html_element(elem->children[elem->num_children],elem,cur+1,strchr(cur+1,'>') - (cur+1)) == -1) {
+					free(elem->children[elem->num_children]);
+					elem->children[elem->num_children] = NULL;
+				} else {
 				elem = elem->children[elem->num_children++];
+				}
 				
 				if (ISVOIDELEMENT(elem->tag)) {
 					char *t = get_default_innerhtml(elem->tag);
@@ -659,7 +695,8 @@ char *render_html_file(char *filename, char *output_filename) {
 				elem = elem->parent;
 				cur = strchr(cur,'>')+1;
 			}		
-		} else {
+		} 
+		if (!de_cur_equals) {
 			if (!is_whitespace_char(*cur) || (elem->innertext_length != 0 && elem->innertext[elem->innertext_length - 1] != 127 && !is_whitespace_char(*(cur-1)))) {
 				if (elem->innertext_length >= elem->innertext_size - 1) {
 					elem->innertext = realloc(elem->innertext, elem->innertext_size * 2);
@@ -684,6 +721,7 @@ char *render_html_file(char *filename, char *output_filename) {
 	test_print_structure(html);
 	printf("\n------------------------\n");
 	
+	printf("---- calling render_page() ----\n");
 	render_page(html,html);
 	if (output_filename != NULL) {
     	fd = open(output_filename,O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -694,6 +732,6 @@ char *render_html_file(char *filename, char *output_filename) {
 	free(file);
 	free(qts);
 	
-	output = realloc(output,strlen(output)+1);
+	//output = realloc(output,strlen(output)+1);
 	return output;
 }
