@@ -191,6 +191,7 @@ void *minpointer_nnull(void *a, void *b);
 int is_whitespace_char(int c);
 size_t strip_whitespace_inplace(char *s);
 void tolower_inplace(char *t);
+char *mystrchrnul(const char *s, int c);
 
 char static_tolower_string[100];
 char *static_tolowern(char *string, size_t n);

@@ -7,6 +7,16 @@
 #include "browse.h"
 #include <ctype.h>
 
+char html_symbols[][2][8] = {
+	{"&nbsp;" , " "},
+	{"&emsp;" , "    "},
+	{"&raquo;" , ">>"},
+	{"&laquo;" , "<<"},
+	{"&lt;" , "<"},
+	{"&gr;" , ">"},
+};
+size_t html_symbols_len = sizeof(html_symbols) / sizeof(html_symbols[0]);
+
 char html_element_index_names[][16] = {
 "html",  // 0
 
@@ -136,6 +146,7 @@ char html_element_index_names[][16] = {
 
 "noframes" // 112
 };
+size_t html_element_index_names_len = sizeof(html_element_index_names) / sizeof(html_element_index_names[0]);
 
 char *file;
 char *output;
@@ -496,6 +507,17 @@ void *minpointer_nnull(void *a, void *b) {
 }
 
 /*
+	strchr, but if the find fails return the null byte at the end of s
+*/
+char *mystrchrnul(const char *s, int c) {
+	char *r = strchr(s,c);
+	if (r) {return r;}
+	else {
+		return (char *)s + strlen(s);
+	}
+}
+
+/*
 	Returns whether is an char is considered whitespace
 */
 int is_whitespace_char(int c) {
@@ -698,6 +720,24 @@ char *render_html_file(char *filename, char *output_filename) {
 		} 
 		if (!de_cur_equals) {
 			if (!is_whitespace_char(*cur) || (elem->innertext_length != 0 && elem->innertext[elem->innertext_length - 1] != 127 && !is_whitespace_char(*(cur-1)))) {
+				if (*cur == '&' && mystrchrnul(cur,';') < strchr(cur,' ')) {
+					static_tolowern(cur, strchr(cur,';') + 1 - cur);
+					printf("static_tolower_string: '%s'\n", static_tolower_string);
+					int i;
+					for (i = 0; i < html_symbols_len; i++) {
+						if (!strcmp(static_tolower_string, html_symbols[i][0])) {
+							if (elem->innertext_length >= elem->innertext_size - 1 - strlen(html_symbols[i][1])) {
+								elem->innertext = realloc(elem->innertext, elem->innertext_size * 2);
+								elem->innertext_size *= 2;
+							}	
+							strcpy(elem->innertext + elem->innertext_length, html_symbols[i][1]);
+							elem->innertext_length += strlen(html_symbols[i][1]);
+							cur = strchr(cur,';') + 1;
+							goto endLabel;
+						}
+					}
+				}
+				
 				if (elem->innertext_length >= elem->innertext_size - 1) {
 					elem->innertext = realloc(elem->innertext, elem->innertext_size * 2);
 					elem->innertext_size *= 2;
@@ -709,6 +749,9 @@ char *render_html_file(char *filename, char *output_filename) {
 					elem->innertext[(elem->innertext_length)++] = *(cur++);
 				}
 				elem->innertext[elem->innertext_length] = '\0';
+
+				endLabel:
+				;
 			} else {
 			  cur++;	
 			}

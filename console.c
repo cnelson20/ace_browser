@@ -15,17 +15,6 @@
 
 extern char html_element_index_names[][16];
 
-/*
-	strchr, but if the find fails return the null byte at the end of s
-*/
-char *mystrchrnul(const char *s, int c) {
-	char *r = strchr(s,c);
-	if (r) {return r;}
-	else {
-		return (char *)s + strlen(s);
-	}
-}
-
 /* 
 	strlen, ignoring DC1 ( and the succeeding character) and DC2 from parts of code
 */
@@ -216,6 +205,7 @@ int main(int argc, char *argv[]) {
 	    dwld_file = malloc(strlen(path) + 1);
 	    strcpy(dwld_file,path);
 	}
+	printf("dwld_file: '%s'\n", dwld_file);
 	  
 	printf("site: '%s', path: '%s'\n",site,path);
 	/* 
@@ -436,6 +426,7 @@ int main(int argc, char *argv[]) {
 							set_attributes((unsigned char)lines[cur_row][i++]);
 							continue;
 						} else if (lines[cur_row][i] == DC2) {
+							attrset(COLOR_PAIR(1));
 							i++;
 							continue;
 						}
@@ -455,6 +446,7 @@ int main(int argc, char *argv[]) {
 							i++;
 							continue;
 						} else if (lines[scroll_y][i] == DC2) {
+							attrset(COLOR_PAIR(1));
 							i++;
 							continue;
 						}
@@ -475,6 +467,7 @@ int main(int argc, char *argv[]) {
 						set_attributes((unsigned char)lines[j][i++]);
 						continue;
 					} else if (lines[j][i] == DC2) {
+						attrset(COLOR_PAIR(1));
 						i++;
 						continue;
 					}
