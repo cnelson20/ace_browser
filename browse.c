@@ -395,14 +395,27 @@ char *render_page(struct html_element *html, struct html_element *body) {
 		while (*s) {
 			if (*s == 127) {
 				if (ISBLOCKLEVEL(body->children[i]->tag)) {
-					if (output_temp > output && *(output_temp-1) != '\n') {
-						if (output_temp - output >= output_size) {
-							output_size *= 2;
-							output = realloc(output,output_size);
-							output_temp = output + strlen(output);
+					if (output_temp > output) {
+						char *ot = output_temp - 1;
+						while (ot > output) {
+							//printf("*ot: #%d '%c'\n", *ot, *ot);
+							if (*ot == DC2) {
+								ot--;
+							} else if (*(ot - 1) == DC1) {
+								ot -= 2;
+							} else {
+								break;
+							}
 						}
-						*(output_temp++) = '\n';
-						*(output_temp) = '\0';
+						if (ot <= output && *ot != '\n') {
+							if (output_temp - output >= output_size) {
+								output_size *= 2;
+								output = realloc(output,output_size);
+								output_temp = output + strlen(output);
+							}
+							*(output_temp++) = '\n';
+							*(output_temp) = '\0';
+						}
 					}
 					render_page(html,body->children[i]);
 					output_temp = output + strlen(output);

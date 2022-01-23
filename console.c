@@ -281,6 +281,7 @@ int main(int argc, char *argv[]) {
 	attrset(COLOR_PAIR(1));
 	timeout(0);
 	is_not_firstloop = 0;
+	int second_loop = 0;
 	getyx(stdscr, y ,x);
 	while(1) {
 		int old_scroll_x = scroll_x;
@@ -372,8 +373,8 @@ int main(int argc, char *argv[]) {
 						//printf("innertext: '%s'\n",selected->innertext);
 						//exit(0);
 					} else {
-						attrset(COLOR_PAIR(1));
-						printw("nul");
+						//attrset(COLOR_PAIR(1));
+						//printw("nul");
 					}
 					break;
 				case KEY_UP:
@@ -408,55 +409,61 @@ int main(int argc, char *argv[]) {
 					break;
 			}
 		}
-		if (scroll_x == old_scroll_x && is_not_firstloop) {
+		if ((scroll_x == old_scroll_x && is_not_firstloop) || second_loop) {
 			if (scroll_y != old_scroll_y) {
 				if (scroll_y > old_scroll_y) {
 					int i, cur_row; 
-					
 					while (scroll_y > old_scroll_y) {
 						scrl(1);
 						old_scroll_y++;
+						
+						cur_row = max_y - 1;
+						move(cur_row,0);
+						cur_row += scroll_y;
+						for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[cur_row]) && lines[cur_row - 1][i];) {
+							if (lines[cur_row][i] == DC1) {
+								i++;
+								set_attributes((unsigned char)lines[cur_row][i++]);
+								continue;
+							} else if (lines[cur_row][i] == DC2) {
+								attrset(COLOR_PAIR(1));
+								i++;
+								continue;
+							}
+							addch(lines[cur_row][i++]);
+						}	
 					}
-					cur_row = max_y - 1;
-					move(cur_row,0);
-					cur_row += scroll_y;
-					for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[cur_row]) && lines[cur_row - 1][i];) {
-						if (lines[cur_row][i] == DC1) {
-							i++;
-							set_attributes((unsigned char)lines[cur_row][i++]);
-							continue;
-						} else if (lines[cur_row][i] == DC2) {
-							attrset(COLOR_PAIR(1));
-							i++;
-							continue;
-						}
-						addch(lines[cur_row][i++]);
-					}
-				} else {
+				}
+				if (scroll_y < old_scroll_y) {
 					int i;
 					while (scroll_y < old_scroll_y) {
 						scrl(-1);
 						old_scroll_y--;
-					}
-					move(0,0);
-					for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[scroll_y]) && lines[scroll_y][i];) {
-						if (lines[scroll_y][i] == DC1) {
-							i++;
-							set_attributes((unsigned char)lines[scroll_y][i++]);
-							i++;
-							continue;
-						} else if (lines[scroll_y][i] == DC2) {
-							attrset(COLOR_PAIR(1));
-							i++;
-							continue;
+
+						move(0,0);
+						for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[scroll_y]) && lines[scroll_y][i];) {
+							if (lines[scroll_y][i] == DC1) {
+								i++;
+								set_attributes((unsigned char)lines[scroll_y][i++]);
+								continue;
+							} else if (lines[scroll_y][i] == DC2) {
+								attrset(COLOR_PAIR(1));
+								i++;
+								continue;
+							}
+							addch(lines[scroll_y][i++]);
 						}
-						addch(lines[scroll_y][i++]);
 					}
 				}
 			}
 		} else {
 			wbkgd(stdscr,COLOR_PAIR(1));
 			clear();
+			if (is_not_firstloop) {
+				second_loop = 0;
+			} else {
+				second_loop = 1;
+			}
 			is_not_firstloop = 1;
 			move(0,0);
 			int i,j;
@@ -476,6 +483,10 @@ int main(int argc, char *argv[]) {
 				addch('\n');
 			}
 		}
+		move(max_y - 1, 0);
+		attrset(COLOR_PAIR(1));
+		printw("x: %d y: %d    ",scroll_x + x, scroll_y + y);
+		
 		move(y,x);
 		refresh();		
 	}
