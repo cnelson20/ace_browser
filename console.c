@@ -278,7 +278,7 @@ int main(int argc, char *argv[]) {
 	scroll_y = 0;
 
 	attrset(COLOR_PAIR(1));
-	//timeout(0);
+	timeout(0);
 	is_not_firstloop = 0;
 	getyx(stdscr, y ,x);
 	while(1) {
