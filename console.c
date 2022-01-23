@@ -14,6 +14,7 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
 extern char html_element_index_names[][16];
+extern size_t html_element_index_names_len;
 
 /* 
 	strlen, ignoring DC1 ( and the succeeding character) and DC2 from parts of code
@@ -21,11 +22,8 @@ extern char html_element_index_names[][16];
 int strlen_special(char *s) {
 	int i = 0;
 	while (*s) {
-		if (*s == DC1) {
-			s++;
-			s += sizeof(char);
-		} else if (*s == DC2) {
-			s++;
+		if (*s == DC1 || *s == DC2) {
+			s += 2;
 		} else {
 			i++;
 			s++;
@@ -223,11 +221,12 @@ int main(int argc, char *argv[]) {
 	render_html_file(dwld_file, "output.dat");
 	printf("render_html_file() finished\n");
 	
-	temp = output;
-	set_dims_x = 0;
-	set_dims_y = 0;
-	html_set_dims(html,strchr(output,DC1)+2);
-	
+	if (is_html) {
+		set_dims_x = 0;
+		set_dims_y = 0;
+		html_set_dims(html,strchr(output,DC1)+2);
+	}
+
 	initscr();
 	raw();
 	keypad(stdscr,TRUE);
@@ -279,9 +278,8 @@ int main(int argc, char *argv[]) {
 	scroll_y = 0;
 
 	attrset(COLOR_PAIR(1));
-	timeout(0);
+	//timeout(0);
 	is_not_firstloop = 0;
-	int second_loop = 0;
 	getyx(stdscr, y ,x);
 	while(1) {
 		int old_scroll_x = scroll_x;
@@ -298,6 +296,9 @@ int main(int argc, char *argv[]) {
 			struct html_element *selected;
 			switch (ch) {
 				case '\n':
+					if (!is_html) {
+						break;
+					}
 					selected = search_html_xy(html,scroll_x + x, scroll_y + y /* + 1*/);
 					if (selected != NULL) {
 						switch (selected->tag) {
@@ -405,53 +406,58 @@ int main(int argc, char *argv[]) {
 						x++;
 					}
 					break;
-				default:
+				case 339: /* PAGE UP */
+					if (y != 0) {
+						y = 0;
+					} else {
+						scroll_y -= max_y;
+						if (scroll_y < 0) {
+							scroll_y = 0;
+						}
+					}
+					break;
+				case 338: /* PAGE DOWN */
+					if (y != max_y - 1) {
+						y = max_y - 1;
+					} else {
+						scroll_y = min(max_scroll_y - 1, scroll_y + max_y);
+					}
 					break;
 			}
 		}
-		if ((scroll_x == old_scroll_x && is_not_firstloop) || second_loop) {
+		if (scroll_x == old_scroll_x && is_not_firstloop) {
 			if (scroll_y != old_scroll_y) {
 				if (scroll_y > old_scroll_y) {
 					int i, cur_row; 
 					while (scroll_y > old_scroll_y) {
 						scrl(1);
 						old_scroll_y++;
-						
-						cur_row = max_y - 1;
-						move(cur_row,0);
-						cur_row += scroll_y;
-						for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[cur_row]) && lines[cur_row - 1][i];) {
-							if (lines[cur_row][i] == DC1) {
+
+						move(max_y - 1, x);
+						cur_row = old_scroll_y + max_y - 1;
+						for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[cur_row]) && lines[cur_row][i];) {
+							if (lines[cur_row][i] == DC1 || lines[cur_row][i] == DC2) {
 								i++;
 								set_attributes((unsigned char)lines[cur_row][i++]);
 								continue;
-							} else if (lines[cur_row][i] == DC2) {
-								attrset(COLOR_PAIR(1));
-								i++;
-								continue;
 							}
 							addch(lines[cur_row][i++]);
-						}	
+						}
 					}
-				}
-				if (scroll_y < old_scroll_y) {
+				} else {
 					int i;
 					while (scroll_y < old_scroll_y) {
 						scrl(-1);
 						old_scroll_y--;
 
 						move(0,0);
-						for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[scroll_y]) && lines[scroll_y][i];) {
-							if (lines[scroll_y][i] == DC1) {
+						for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[old_scroll_y]) && lines[old_scroll_y][i];) {
+							if (lines[old_scroll_y][i] == DC1 || lines[old_scroll_y][i] == DC2) {
 								i++;
-								set_attributes((unsigned char)lines[scroll_y][i++]);
-								continue;
-							} else if (lines[scroll_y][i] == DC2) {
-								attrset(COLOR_PAIR(1));
-								i++;
+								set_attributes((unsigned char)lines[old_scroll_y][i++]);
 								continue;
 							}
-							addch(lines[scroll_y][i++]);
+							addch(lines[old_scroll_y][i++]);
 						}
 					}
 				}
@@ -459,33 +465,29 @@ int main(int argc, char *argv[]) {
 		} else {
 			wbkgd(stdscr,COLOR_PAIR(1));
 			clear();
-			if (is_not_firstloop) {
-				second_loop = 0;
-			} else {
-				second_loop = 1;
-			}
-			is_not_firstloop = 1;
 			move(0,0);
 			int i,j;
 			for (j = scroll_y; j < scroll_y + max_y && lines[j]; j++) {
 				for (i = scroll_x; i < scroll_x + max_x && i < strlen(lines[j]) && lines[j][i];) {
-					if (lines[j][i] == DC1) {
+					if (lines[j][i] == DC1 || lines[j][i] == DC2) {
 						i++;
 						set_attributes((unsigned char)lines[j][i++]);
-						continue;
-					} else if (lines[j][i] == DC2) {
-						attrset(COLOR_PAIR(1));
-						i++;
 						continue;
 					}
 					addch(lines[j][i++]);
 				}
 				addch('\n');
 			}
+			if (!is_not_firstloop) {
+				if (is_html) { scrl(-1); }
+				is_not_firstloop = 1;
+			}
 		}
-		move(max_y - 1, 0);
-		attrset(COLOR_PAIR(1));
-		printw("x: %d y: %d    ",scroll_x + x, scroll_y + y);
+		if (ch >= 0) {
+			move(max_y - 1, 120);
+			attrset(COLOR_PAIR(1));
+			printw("ch: %d ^:%d \\/:%d     ",ch,KEY_UP,KEY_DOWN);
+		}
 		
 		move(y,x);
 		refresh();		
@@ -494,11 +496,27 @@ int main(int argc, char *argv[]) {
 	getch();
 	endwin();
 	
-	print_html_structure(html, 1);
-	
-	free_html_element(html);
+	if (is_html) {
+		print_html_structure(html, 1);
+		free_html_element(html);
+	} else {
+		printf("max_scroll_x: %d\n", max_scroll_x);
+		printf("max_scroll_y: %d\n", max_scroll_y);
+		printf("max_x: %d\n", max_x);
+		printf("max_y: %d\n", max_y);
+		printf("scroll_x: %d\n", scroll_x);
+		printf("scroll_y: %d\n", scroll_y);
+	}
 	free(lines);
 	free(output);	
+
+	/*
+	printf("---- end ----\n");
+	int index;
+	for (index = 0; index < html_element_index_names_len; index++) {
+		printf("%s -> %d\n",html_element_index_names[index], index);
+	}
+	*/
 
 	free(site);
 	free(path);

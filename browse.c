@@ -114,7 +114,7 @@ char html_element_index_names[][16] = {
 "ins",  // 83
  
 "caption",  // 84
-"col"  // 85
+"col",  // 85
 "colgroup",  // 86
 "table",  // 87
 "tbody",  // 88
@@ -154,6 +154,7 @@ char *output_temp;
 size_t output_size;
 
 struct html_element *html;
+int is_html;
 
 /* 
 	Given a string of the tag name,
@@ -202,26 +203,44 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 		html->properties = malloc(0);
 		html->properties_length = 0;
 		while (1) {
+			static_tolower(copyfrom);
+			//printf("copyfrom: %s\n", static_tolower_string);
 			if (*copyfrom == '>' || (*copyfrom == '/' && *(copyfrom+1) == '>') || !strchr(copyfrom,'=')) {break;}
 
 			html->properties = realloc(html->properties, sizeof(struct key_value_pair *) * (1 + html->properties_length));
 			html->properties[html->properties_length] = malloc(sizeof(struct key_value_pair));
-			char *property_name_end = strchr(copyfrom,'=');
-			*property_name_end = '\0';
-			html->properties[html->properties_length]->key = malloc(strlen(copyfrom) + 1);
-			strcpy(html->properties[html->properties_length]->key,copyfrom);
-			strip_whitespace_inplace(html->properties[html->properties_length]->key);
-			tolower_inplace(html->properties[html->properties_length]->key);
-			*property_name_end = '=';
-			copyfrom = minpointer_nnull(strchr(property_name_end, '"'),strchr(property_name_end,'\''));
-			char quote_type = *copyfrom;
-			copyfrom++; 
-			int value_length = strchr(copyfrom,quote_type) - copyfrom;
-			html->properties[html->properties_length]->value = malloc(value_length + 1);
-			memcpy(html->properties[html->properties_length]->value, copyfrom, value_length);
-			*(html->properties[html->properties_length]->value + value_length) = '\0';
-
-			copyfrom += value_length + 1;
+			char *property_name_end = minpointer_nnull(strchr(copyfrom, '='), strchr(copyfrom, '>'));
+			if (*property_name_end == '=') {
+				*property_name_end = '\0';
+				html->properties[html->properties_length]->key = malloc(strlen(copyfrom) + 1);
+				strcpy(html->properties[html->properties_length]->key,copyfrom);
+				strip_whitespace_inplace(html->properties[html->properties_length]->key);
+				tolower_inplace(html->properties[html->properties_length]->key);
+				*property_name_end = '=';
+				copyfrom = minpointer_nnull(strchr(property_name_end, '"'),strchr(property_name_end,'\''));
+				char quote_type = *copyfrom;
+				copyfrom++; 
+				int value_length = strchr(copyfrom,quote_type) - copyfrom;
+				html->properties[html->properties_length]->value = malloc(value_length + 1);
+				memcpy(html->properties[html->properties_length]->value, copyfrom, value_length);
+				*(html->properties[html->properties_length]->value + value_length) = '\0';
+				copyfrom += value_length + 1;
+			} else {
+				if (*(property_name_end - 1) == '/') {
+					property_name_end--;
+				}
+				char temp_char = *property_name_end;
+				*property_name_end = '\0';
+				
+				html->properties[html->properties_length]->key = malloc(strlen(copyfrom) + 1);
+				strcpy(html->properties[html->properties_length]->key,copyfrom);
+				strip_whitespace_inplace(html->properties[html->properties_length]->key);
+				tolower_inplace(html->properties[html->properties_length]->key);
+				html->properties[html->properties_length]->value = malloc(strlen("") + 1);
+				strcpy(html->properties[html->properties_length]->value, "");
+				*property_name_end = temp_char;
+				copyfrom = strchr(property_name_end,'>');
+			}
 			html->properties_length++;
 		}	
 		//html->properties = malloc(min(strlen(copyfrom), strchr(copyfrom,'>') - copyfrom));
@@ -267,9 +286,10 @@ void free_html_element(struct html_element *html) {
 */
 char gen_console_attributes_char(struct html_element *html) {
 	unsigned char val = 0;
-	unsigned char color = 1;
-	if (html->tag == ELEMENT_A) { val |= 64; color = 5;}
-	if (html->tag == ELEMENT_B || html->tag == ELEMENT_STRONG) { val |= 128; }
+	unsigned char color = 0x01;
+	if (html->tag == ELEMENT_A) { val |= 64; color = 0x05;}
+	if (html->tag == ELEMENT_B || (html->tag >= ELEMENT_H1 && html->tag <= ELEMENT_H6) || html->tag == ELEMENT_STRONG) { val |= 128; }
+	if (html->tag == ELEMENT_TEXTAREA || html->tag == ELEMENT_INPUT) {color = 0x08;}
 	val |= color;
 	
 	return (char)val;
@@ -446,12 +466,17 @@ char *render_page(struct html_element *html, struct html_element *body) {
 			s++;
 		}
 		
-		if (output_temp - output >= output_size) {
+		if (output_temp - output >= output_size - 1) {
 			output_size *= 2;
 			output = realloc(output,output_size);
 			output_temp = output + strlen(output);
 		}
 		*(output_temp++) = DC2;
+		if (body->parent != NULL) {
+			*(output_temp++) = gen_console_attributes_char(body->parent);
+		} else {
+			*(output_temp++) = 1;
+		}
 		*output_temp = '\0';
 	}
 	
@@ -507,6 +532,26 @@ void tolower_inplace(char *t) {
 */
 int min(int a, int b) {
 	return (a < b ? a : b);
+}
+
+/*
+	returns the smallest power of 2 >= n
+*/
+int smallest_pow2(int n) {
+	int log2 = 0;
+	n--;
+	while (n > 1) {
+		n /= 2;
+		log2++;
+	}
+	log2++;
+	n = 1;
+	while (log2 > 0) {
+		n *= 2;
+		log2--;
+	}
+
+	return n;
 }
 
 /*
@@ -596,12 +641,34 @@ unsigned char *geninquotes_html(char *html, size_t len) {
 	return a string of a default innerhtml
 	ex: get_default_innerhtml(ELEMENT_BR) -> "\n"
 */
-char *get_default_innerhtml(int tag) {
-	switch (tag) {
+char *get_default_innerhtml(struct html_element *elem) {
+	switch (elem->tag) {
 		case ELEMENT_BR:
 			return (char *)"\n";
 		case ELEMENT_HR:
 			return (char *)"------------------------\n";
+		case ELEMENT_INPUT:
+			;
+			int i;
+			for (i = 0; i < elem->properties_length; i++) {
+				if (!strcmp(elem->properties[i]->key, "type")) {
+					char *name_value = elem->properties[i]->value;
+					if (!stricmp(name_value, "text") || !stricmp(name_value, "password")) {
+						return (char *)"           ";
+					} else if (!stricmp(name_value, "submit")) {
+						for (i = 0; i < elem->properties_length; i++) {
+							if (!strcmp(elem->properties[i]->key, "value")) {
+								return elem->properties[i]->value;
+							}
+						}
+						return (char *)"Submit";
+					} else if (!stricmp(name_value, "hidden")) {
+						return (char *)"";
+					}
+					return "~~INPUT~~";
+				}
+			}
+			return NULL;
 		default:
 			return NULL;
 	}
@@ -623,12 +690,27 @@ char *render_html_file(char *filename, char *output_filename) {
 	read(fd,file,fileinfo.st_size);
 	close(fd);
 	printf("---- done with file ----\n");
-	
+
 	printf("---- calling geninquotes_html() ----\n");
 	char *qts = geninquotes_html(file,strlen(file));
 	char *cur = file;
 	
 	html = NULL;
+	is_html = 1;
+	if (!strchr(file,'<') || !strchr(file,'>')) {
+		is_html = 0;
+	} 
+	if (is_html) {
+		static_tolowern(strchr(file,'<'),strchr(file,'>') - strchr(file,'<'));
+		printf("Declaration: '%s'\n",static_tolower_string);
+		is_html = memcmp(static_tolower_string,"<!doctype html", strchr(file,'>') - strchr(file,'<')) == 0;
+	}
+	if (is_html == 0) {
+		is_html = 0;
+		output = file;
+		output_size = strlen(output);
+		return output;
+	}
 	struct html_element *elem = NULL;
 	
 	while (1) {
@@ -665,7 +747,7 @@ char *render_html_file(char *filename, char *output_filename) {
 			if (elem->tag == ELEMENT_SCRIPT) {
 			  	if (*(cur+1) == '/') {
 					static_tolowern(cur+2,strlen("script"));
-					printf("~~CUR~~: '%s'\n",static_tolower_string);
+					//printf("~~CUR~~: '%s'\n",static_tolower_string);
 					if (!strcmp(static_tolower_string,"script") && !qts[cur - file + 2]) {
 						elem = elem->parent;
 						cur = strchr(cur,'>')+1;
@@ -695,8 +777,9 @@ char *render_html_file(char *filename, char *output_filename) {
 				elem = elem->children[elem->num_children++];
 				}
 				
+				char *t = get_default_innerhtml(elem);
 				if (ISVOIDELEMENT(elem->tag)) {
-					char *t = get_default_innerhtml(elem->tag);
+					//printf("%s (%d): is a voidelement\n",html_element_index_names[elem->tag],elem->tag);
 					if (t != NULL) {
 						elem->innertext_size = strlen(t)+1;
 						elem->innertext = malloc(elem->innertext_size);
@@ -708,10 +791,18 @@ char *render_html_file(char *filename, char *output_filename) {
 						elem->innertext_length = 0;
 					}
 				} else {
-					elem->innertext = malloc(32);
-					elem->innertext[0] = '\0';
-					elem->innertext_size = 32;
-					elem->innertext_length = 0;
+					//printf("%s (%d): is not a voidelement\n",html_element_index_names[elem->tag], elem->tag);
+					if (t != NULL) {
+						elem->innertext_size = smallest_pow2(strlen(t) + 1);
+						elem->innertext = malloc(elem->innertext_size);
+						elem->innertext[0] = '\0';
+						elem->innertext_length = 0;
+ 					} else {
+						elem->innertext_size = 32;
+						elem->innertext = malloc(elem->innertext_size);
+						elem->innertext[0] = '\0';
+						elem->innertext_length = 0;
+					}
 				}
 				
 				cur = strchr(cur,'>');
@@ -782,7 +873,7 @@ char *render_html_file(char *filename, char *output_filename) {
 	if (output_filename != NULL) {
     	fd = open(output_filename,O_WRONLY | O_CREAT | O_TRUNC, 0644);
      	write(fd,output,strlen(output));
-	    close(fd);
+		close(fd);
 	}
 
 	free(file);

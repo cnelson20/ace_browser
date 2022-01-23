@@ -148,7 +148,7 @@
 
 #define ISINLINE(x) (x == ELEMENT_A || x == ELEMENT_ABBR || x == ELEMENT_B || x == ELEMENT_BDI || x == ELEMENT_BDO || x == ELEMENT_BIG || x == ELEMENT_BR || x == ELEMENT_BUTTON || x == ELEMENT_CANVAS || x == ELEMENT_CITE || x == ELEMENT_CODE || x == ELEMENT_DATA || x == ELEMENT_DATALIST || x == ELEMENT_DEL || x == ELEMENT_DFN || x == ELEMENT_EM || x == ELEMENT_EMBED || x == ELEMENT_I || x == ELEMENT_IFRAME || x == ELEMENT_IMG || x == ELEMENT_INPUT || x == ELEMENT_INS || x == ELEMENT_KBD || x == ELEMENT_LABEL || x == ELEMENT_MAP || x == ELEMENT_MARK || x == ELEMENT_METER || x == ELEMENT_NOSCRIPT || x == ELEMENT_OBJECT || x == ELEMENT_OUTPUT || x == ELEMENT_PICTURE || x == ELEMENT_PROGRESS || x == ELEMENT_Q || x == ELEMENT_RUBY || x == ELEMENT_S || x == ELEMENT_SAMP || x == ELEMENT_SCRIPT || x == ELEMENT_SELECT || x == ELEMENT_SLOT || x == ELEMENT_SMALL || x == ELEMENT_SPAN || x == ELEMENT_STRONG || x == ELEMENT_SUB || x == ELEMENT_SUP || x == ELEMENT_SVG || x == ELEMENT_TEMPLATE || x == ELEMENT_TEXTAREA || x == ELEMENT_TIME || x == ELEMENT_U || x == ELEMENT_TT || x == ELEMENT_VAR || x == ELEMENT_VIDEO || x == ELEMENT_WBR)
 
-#define ISVOIDELEMENT(x) (x == ELEMENT_AREA || x == ELEMENT_BASE || x == ELEMENT_BR || x == ELEMENT_COL || x == ELEMENT_EMBED || x == ELEMENT_HR || x == ELEMENT_IMG || x == ELEMENT_INPUT || x == ELEMENT_LINK || x == ELEMENT_META || x == ELEMENT_PARAM || x == ELEMENT_SOURCE || x == ELEMENT_TRACK || x == ELEMENT_WBR)
+#define ISVOIDELEMENT(x) (x == ELEMENT_INPUT || x == ELEMENT_AREA || x == ELEMENT_BASE || x == ELEMENT_BR || x == ELEMENT_COL || x == ELEMENT_EMBED || x == ELEMENT_HR || x == ELEMENT_IMG || x == ELEMENT_INPUT || x == ELEMENT_LINK || x == ELEMENT_META || x == ELEMENT_PARAM || x == ELEMENT_SOURCE || x == ELEMENT_TRACK || x == ELEMENT_WBR)
 
 #define DONTPRINT(x) (x ==  ELEMENT_HEAD || x == ELEMENT_SCRIPT || x == ELEMENT_STYLE)
 
@@ -184,9 +184,11 @@ int init_html_element(struct html_element *html, struct html_element *f_parent, 
 void free_html_element(struct html_element *html);
 
 char gen_console_attributes_char(struct html_element *html);
+char *get_default_innerhtml(struct html_element *elem);
 
 int stricmp(const char *s1, const char *s2);
 int min(int a, int b);
+int smallest_pow2(int n);
 void *minpointer_nnull(void *a, void *b);
 int is_whitespace_char(int c);
 size_t strip_whitespace_inplace(char *s);
@@ -213,5 +215,6 @@ extern char *file;
 extern char *output;
 extern char *output_temp;
 extern size_t output_size;
+extern int is_html;
 
 extern struct html_element *html;
