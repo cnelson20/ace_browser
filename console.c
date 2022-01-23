@@ -189,6 +189,10 @@ int main(int argc, char *argv[]) {
 	int i, fd , is_not_firstloop;
 	char **lines;
 
+	if (argc < 2) {
+		printf("Usage:\n./console URL\n./console -f FILENAME\n./console -s SITE PATH\n");
+		exit(1);
+	}
 	if (!stricmp(argv[1],"-f")) {
 	    site = malloc(strlen("_file") + 1);
 	    strcpy(site,"_file");
@@ -204,9 +208,6 @@ int main(int argc, char *argv[]) {
 	    get_site_path_from_url(argv[1],&site,&path);
 	}
 	printf("site: '%s'  path: '%s'\n",site,path);
-
- Test_Label:
-	;
 	
 	char *dwld_file;
 	if (stricmp(site,"_file")) {
@@ -227,14 +228,10 @@ int main(int argc, char *argv[]) {
 	  printf("Error locating file, reason: '%s'\nthe requested URL might not exist, check that\n",strerror(errno));
 	  exit(1);
 	}
+
+	printf("calling render_html_file()\n");
 	render_html_file(dwld_file, "output.dat");
-	/* This would read from a file 
-	stat(argv[1],&std);
-	fd = open(argv[1], O_RDONLY);
-	output = malloc(std.st_size+1);
-	read(fd,output,std.st_size);
-	close(fd);
-	*/
+	printf("render_html_file() finished\n");
 	
 	temp = output;
 	set_dims_x = 0;
@@ -292,6 +289,7 @@ int main(int argc, char *argv[]) {
 	scroll_y = 0;
 
 	attrset(COLOR_PAIR(1));
+	timeout(0);
 	is_not_firstloop = 0;
 	getyx(stdscr, y ,x);
 	while(1) {
@@ -309,17 +307,82 @@ int main(int argc, char *argv[]) {
 			struct html_element *selected;
 			switch (ch) {
 				case '\n':
-					selected = search_html_xy(html,scroll_x + x, scroll_y + y);
+					selected = search_html_xy(html,scroll_x + x, scroll_y + y /* + 1*/);
 					if (selected != NULL) {
 						switch (selected->tag) {
+							case ELEMENT_A:
+								endwin();
+								char **self_exec = malloc(5 * sizeof(char));
+								char *href_value = NULL;
+								int i;
+								for (i = 0; i < selected->properties_length; i++) {
+									if (!stricmp(selected->properties[i]->key, "href")) {
+										href_value = selected->properties[i]->value;
+										break;
+									}
+								}
+								if (!href_value) {break;}
+								printf("href found!: '%s'\n",href_value);
+								if (strstr(href_value, "://")) {
+									// New site
+									href_value = strstr(href_value,"://") + strlen("://");
+									printf("copied href: '%s'\n",href_value);
+									free(site);
+									free(path);
+									char *temp = strchr(href_value, '/');
+									if (temp == NULL) {
+										site = malloc(strlen(href_value) + 1);
+										strcpy(site, href_value);
+										path = malloc(2);
+										strcpy(path,"/");
+									} else {
+										path = malloc(strlen(temp) + 1);
+										strcpy(path,temp);
+										*temp = '\0';
+										site = malloc(strlen(href_value) + 1);
+										strcpy(site, href_value);
+										*temp = '/';
+									}
+								} else if (*href_value == '/') {
+									// Absolute pathing
+									free(path);
+									path = malloc(strlen(href_value) + 1);
+									strcpy(path, href_value);
+									if (!strcmp(site, "_file") && *(path + strlen(path) - 1) != '/') {
+										path = realloc(path, strlen(path) + strlen("index.html") + 1);
+										strcat(path, "index.html");
+									}
+								} else {
+									// Relative pathing
+									if (*(path + strlen(path) - 1) != '/') {
+										*(strrchr(path, '/') + 1) = '\0';
+									}
+									path = realloc(path, strlen(path) + strlen(href_value) + 1);
+									strcat(path, href_value);
+									if (!strcmp(site, "_file") && *(path + strlen(path) - 1) != '/') {
+										path = realloc(path, strlen(path) + strlen("index.html") + 1);
+										strcat(path, "index.html");
+									}
+								}
+								printf("new site: '%s' new path: '%s'\n",site,path);
+								self_exec[0] = malloc(strlen("./console") + 1);
+								strcpy(self_exec[0], "./console");
+								self_exec[1] = malloc(strlen("-s") + 1);
+								strcpy(self_exec[1], "-s");
+								self_exec[2] = site;
+								self_exec[3] = path;
+								self_exec[4] = NULL;
+								execvp(self_exec[0], self_exec);
+								break;
 							default:
 								break;
 						}
-						endwin();
-						printf("%s\n",html_element_index_names[selected->tag]);
-						printf("innertext: '%s'\n",selected->innertext);
-						exit(0);
+						//endwin();
+						//printf("%s\n",html_element_index_names[selected->tag]);
+						//printf("innertext: '%s'\n",selected->innertext);
+						//exit(0);
 					} else {
+						attrset(COLOR_PAIR(1));
 						printw("nul");
 					}
 					break;
@@ -423,6 +486,7 @@ int main(int argc, char *argv[]) {
 		move(y,x);
 		refresh();		
 	}
+	timeout(-1);
 	getch();
 	endwin();
 	
