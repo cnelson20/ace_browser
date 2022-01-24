@@ -39,11 +39,11 @@ could be used (i tested this with my softdev project as the site, it worked)
 - tag name, properties, innerHTML (as js calls it), parent, children (& number of)
 
 #### struct element_properties - holds an element's properties
-- important for css
+- important for whole program
 - holds element's class, id, properties, etc.
 
 #### struct key_value pair - used for \[bad\] pseudo-maps
-  holds 2 char *'s
+- holds 2 char *'s
 
 ### Nonstandard Libraries
 - ncurses ( <ncurses.h> ) 
