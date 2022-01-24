@@ -16,6 +16,7 @@
 extern char html_element_index_names[][16];
 extern size_t html_element_index_names_len;
 
+char text_text[] = "text";
 char *site, *path;
 
 int meta_sleep_pid = 0;
@@ -433,6 +434,9 @@ int main(int argc, char *argv[]) {
 						move(max_y - 2, 80);
 						attrset(COLOR_PAIR(1));
 						//printw("hit!: selected = %s       ",html_element_index_names[selected->tag]);
+						char *type_value = NULL;
+						char *value_value = NULL;
+						int i_2;
 						switch (selected->tag) {
 							case ELEMENT_A:
 								endwin();
@@ -500,17 +504,22 @@ int main(int argc, char *argv[]) {
 								break;
 							case ELEMENT_TEXTAREA:
 							case ELEMENT_INPUT:
-								;
-								char *type_value = NULL;
-								char *value_value = NULL;
-								int i_2;
-								for (i_2 = 0; i_2 < selected->properties_length; i_2++) {
-									if (!stricmp(selected->properties[i_2]->key, "type")) {
-										type_value = selected->properties[i_2]->value;
-										break;
-									}
-								}
-								if (!stricmp(type_value, "submit")) {
+							   /*
+								 char *type_value = NULL;
+								 char *value_value = NULL;
+								 int i_2;
+							   */
+							   if (selected->tag == ELEMENT_INPUT) {
+								   for (i_2 = 0; i_2 < selected->properties_length; i_2++) {
+									   if (!stricmp(selected->properties[i_2]->key, "type")) {
+										 type_value = selected->properties[i_2]->value;
+										 break;
+									   }
+								   }
+							   } else {
+								 type_value = text_text;
+							   }
+							   if (!stricmp(type_value, "submit")) {
 									endwin();
 									printf("Submit!\n");
 									struct html_element *element_form = selected;
