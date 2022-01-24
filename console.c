@@ -525,9 +525,6 @@ int main(int argc, char *argv[]) {
 						//printf("innertext: '%s'\n",selected->innertext);
 						//exit(0);
 					} else {
-						move(max_y - 2, 80);
-						attrset(COLOR_PAIR(1));
-						printw("                                    ");  
 						//attrset(COLOR_PAIR(1));
 						//printw("nul");
 					}
@@ -655,11 +652,6 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
-		}
-		move(max_y - 1, 80);
-		attrset(COLOR_PAIR(1));
-		if (ch != -1) {
-			printw("ch: %d   ", ch);
 		}
 
 		move(y,x);
