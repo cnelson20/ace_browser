@@ -437,11 +437,11 @@ int main(int argc, char *argv[]) {
 								printf("href found!: '%s'\n",href_value);
 								if (strstr(href_value, "://")) {
 									// New site
-									href_value = strstr(href_value,"://") + strlen("://");
+									char *past_href_value = strstr(href_value,"://") + strlen("://");
 									printf("copied href: '%s'\n",href_value);
 									free(site);
 									free(path);
-									char *temp = strchr(href_value, '/');
+									char *temp = strchr(past_href_value, '/');
 									if (temp == NULL) {
 										site = malloc(strlen(href_value) + 1);
 										strcpy(site, href_value);
