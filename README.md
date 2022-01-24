@@ -59,4 +59,7 @@ curl site.com/login --output page.html --cookie-jar cookies.txt -F "username=use
 ```
 allows the client to log in while storing necessary cookies.
 To then access, for example, an account settings page (or anywhere else that would require a login) 
-``` curl site.com/account --output page.html --cookie cookies.txt ``` is usable.
+```bash
+curl site.com/account --output page.html --cookie cookies.txt
+``` 
+is usable.
