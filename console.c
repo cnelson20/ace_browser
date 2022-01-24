@@ -156,10 +156,22 @@ void gen_list_form_inputs(struct html_element *html, int in_form) {
 		  do {
 		      path_temp++;
 		  } while (*path_temp == ' ');
-		  printf("path_temp: '%s'\n", path_temp);
+		  printf("path_temp with URL=: '%s'\n", path_temp);
 		  static_tolowern(path_temp, 4);
 		  printf("static_tolower_string: '%s'\n", static_tolower_string);
-		  strcpy(path_temp, (strstr(static_tolower_string,"url=") - static_tolower_string) + strlen("url=") + path_temp);
+		  char *path_temp_quote = (strstr(static_tolower_string,"url=") - static_tolower_string) + strlen("url=") + path_temp; 
+		  char path_temp_quote_type = *path_temp_quote;
+		  if (path_temp_quote_type == '"' || path_temp_quote_type == '\'') {
+			  path_temp_quote++;
+		  } else {
+			  path_temp_quote_type = '\0';
+		  }
+		  int path_temp_i = 0;
+		  while (*path_temp_quote && *path_temp_quote != path_temp_quote_type) {
+			  path_temp[path_temp_i++] = *(path_temp_quote++);
+		  }
+		  path_temp[path_temp_i] = '\0';
+		  
 		  printf("path_temp: '%s'\n",path_temp);
 		  if (strstr(path_temp, "://")) {
 		    //strcpy(path_temp, path_temp + strlen("://"));
