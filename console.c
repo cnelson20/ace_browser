@@ -60,13 +60,17 @@ void init_colors() {
 	Ex: get_site_path_from_url("google.com/search") => "google.com" , "/search"
 */
 void get_site_path_from_url(char *link, char **site, char **path) {
-	if (strchr(link,'/')) {
-	  *path = malloc(strlen(strchr(link,'/')) + 1);
-	  strcpy(*path,strchr(link,'/'));
-	  *strchr(link,'/') = '\0';
+    char *cur_link = link;
+	if (strstr(link,"://")) {
+	  cur_link = strstr(link,"://") + strlen("://");
+	}
+	if (strchr(cur_link,'/')) {
+	  *path = malloc(strlen(strchr(cur_link,'/')) + 1);
+	  strcpy(*path,strchr(cur_link,'/'));
+	  *strchr(cur_link,'/') = '\0';
 	  *site = malloc(strlen(link) + 1);
 	  strcpy(*site,link);
-	  *strchr(link,'\0') = '/';
+	  *strchr(cur_link,'\0') = '/';
 	} else {
 	  *path = malloc(strlen("/") + 1);
 	  strcpy(*path,"/");
