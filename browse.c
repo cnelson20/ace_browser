@@ -535,6 +535,13 @@ int min(int a, int b) {
 }
 
 /*
+	return the maximum of two ints
+*/
+int max(int a, int b) {
+	return (a >= b ? a : b);
+}
+
+/*
 	returns the smallest power of 2 >= n
 */
 int smallest_pow2(int n) {
@@ -647,6 +654,8 @@ char *get_default_innerhtml(struct html_element *elem) {
 			return (char *)"\n";
 		case ELEMENT_HR:
 			return (char *)"------------------------\n";
+		case ELEMENT_TEXTAREA:
+			return (char *)"                            ";
 		case ELEMENT_INPUT:
 			;
 			int i;
@@ -654,7 +663,7 @@ char *get_default_innerhtml(struct html_element *elem) {
 				if (!strcmp(elem->properties[i]->key, "type")) {
 					char *name_value = elem->properties[i]->value;
 					if (!stricmp(name_value, "text") || !stricmp(name_value, "password")) {
-						return (char *)"           ";
+						return (char *)"            ";
 					} else if (!stricmp(name_value, "submit")) {
 						for (i = 0; i < elem->properties_length; i++) {
 							if (!strcmp(elem->properties[i]->key, "value")) {
@@ -783,8 +792,8 @@ char *render_html_file(char *filename, char *output_filename) {
 					if (t != NULL) {
 						elem->innertext_size = strlen(t)+1;
 						elem->innertext = malloc(elem->innertext_size);
-						elem->innertext_length = elem->innertext_size - 1;
 						strcpy(elem->innertext,t);
+						elem->innertext_length = strlen(elem->innertext);
 					} else {
 						elem->innertext = NULL;
 						elem->innertext_size = 0;
@@ -795,8 +804,9 @@ char *render_html_file(char *filename, char *output_filename) {
 					if (t != NULL) {
 						elem->innertext_size = smallest_pow2(strlen(t) + 1);
 						elem->innertext = malloc(elem->innertext_size);
-						elem->innertext[0] = '\0';
-						elem->innertext_length = 0;
+						//elem->innertext[0] = '\0';
+						strcpy(elem->innertext, t);
+						elem->innertext_length = strlen(elem->innertext);
  					} else {
 						elem->innertext_size = 32;
 						elem->innertext = malloc(elem->innertext_size);

@@ -188,6 +188,7 @@ char *get_default_innerhtml(struct html_element *elem);
 
 int stricmp(const char *s1, const char *s2);
 int min(int a, int b);
+int max(int a, int b);
 int smallest_pow2(int n);
 void *minpointer_nnull(void *a, void *b);
 int is_whitespace_char(int c);

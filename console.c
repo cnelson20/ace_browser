@@ -110,6 +110,23 @@ struct html_element *search_html_xy(struct html_element *html, int x, int y) {
 	}
 }
 
+struct html_element *list_form_inputs[100];
+int list_form_inputs_len;
+void clear_list_form_inputs() {
+	list_form_inputs_len = 0;
+}
+void gen_list_form_inputs(struct html_element *html, int in_form) {
+	if (in_form && IMPORTANT(html->tag)) {
+		list_form_inputs[list_form_inputs_len++] = html;
+		return;
+	}
+	in_form |= (html->tag == ELEMENT_FORM);
+	int i;
+	for (i = 0; i < html->num_children; i++) {
+		gen_list_form_inputs(html->children[i], in_form);
+	}
+
+}
 
 int set_dims_x = 0;
 int set_dims_y = 0;
@@ -144,7 +161,7 @@ char *html_set_dims(struct html_element *elem, char *text) {
 			case DC2:
 				elem->rx = set_dims_x;
 				elem->ry = set_dims_y;
-				return text;
+				return text + 1;
 			case '\n':
 				set_dims_y++;
 				set_dims_x = 0;
@@ -175,33 +192,42 @@ int main(int argc, char *argv[]) {
 	int max_scroll_y, max_scroll_x;
 	int i, fd , is_not_firstloop;
 	char **lines;
+	char *dwld_file;
 
 	if (argc < 2) {
 		printf("Usage:\n./console URL\n./console -f FILENAME\n./console -s SITE PATH\n");
 		exit(1);
 	}
-	if (!stricmp(argv[1],"-f")) {
+	if (!strcmp(argv[1],"-f")) {
 	    site = malloc(strlen("_file") + 1);
 	    strcpy(site,"_file");
 	    path = malloc(strlen(argv[2]) + 1);
 	    strcpy(path,argv[2]);
-	} else if (!stricmp(argv[1],"-s")) {
+	} else if (!strcmp(argv[1],"-s")) {
  	    site = malloc(strlen(argv[2]) + 1);
 	    strcpy(site,argv[2]);
 	    path = malloc(strlen(argv[3]) + 1);
 	    strcpy(path,argv[3]);	    
+	} else if (!strcmp(argv[1],"--site-with-file")) {
+		site = malloc(strlen(argv[2]) + 1);
+	    strcpy(site,argv[2]);
+	    path = malloc(strlen(argv[3]) + 1);
+	    strcpy(path,argv[3]);
+		dwld_file = malloc(strlen(argv[4]) + 1);
+	    strcpy(dwld_file, argv[4]);
 	} else {
 	    /* Download file */
 	    get_site_path_from_url(argv[1],&site,&path);
 	}
 	printf("site: '%s'  path: '%s'\n",site,path);
 	
-	char *dwld_file;
-	if (stricmp(site,"_file")) {
-	    dwld_file = curl(site,path,1,NULL);
-	} else {
-	    dwld_file = malloc(strlen(path) + 1);
-	    strcpy(dwld_file,path);
+	if (strcmp(argv[1],"--site-with-file")) {
+		 if (stricmp(site,"_file")) {
+	    	dwld_file = curl(site,path,1,NULL);
+		} else {
+		    dwld_file = malloc(strlen(path) + 1);
+	    	strcpy(dwld_file,path);
+		}	
 	}
 	printf("dwld_file: '%s'\n", dwld_file);
 	  
@@ -225,6 +251,8 @@ int main(int argc, char *argv[]) {
 		set_dims_x = 0;
 		set_dims_y = 0;
 		html_set_dims(html,strchr(output,DC1)+2);
+		clear_list_form_inputs();
+		gen_list_form_inputs(html, 0);
 	}
 
 	initscr();
@@ -291,7 +319,9 @@ int main(int argc, char *argv[]) {
 			ch = 0;
 		}
 		if (ch >= 0x20 && ch < 0x7F) {
-			break;
+			if (1) {
+				break;
+			}
 		} else {
 			struct html_element *selected;
 			switch (ch) {
@@ -301,6 +331,9 @@ int main(int argc, char *argv[]) {
 					}
 					selected = search_html_xy(html,scroll_x + x, scroll_y + y /* + 1*/);
 					if (selected != NULL) {
+						move(max_y - 2, 80);
+						attrset(COLOR_PAIR(1));
+						printw("hit!: selected = %s       ",html_element_index_names[selected->tag]);
 						switch (selected->tag) {
 							case ELEMENT_A:
 								endwin();
@@ -366,6 +399,124 @@ int main(int argc, char *argv[]) {
 								self_exec[4] = NULL;
 								execvp(self_exec[0], self_exec);
 								break;
+							case ELEMENT_TEXTAREA:
+							case ELEMENT_INPUT:
+								;
+								char *type_value = NULL;
+								char *value_value = NULL;
+								int i_2;
+								for (i_2 = 0; i_2 < selected->properties_length; i_2++) {
+									if (!stricmp(selected->properties[i_2]->key, "type")) {
+										type_value = selected->properties[i_2]->value;
+										break;
+									}
+								}
+								if (!stricmp(type_value, "submit")) {
+									endwin();
+									struct html_element *element_form = selected;
+									while (element_form != NULL && element_form->tag != ELEMENT_FORM) {
+										element_form = element_form->parent;
+									}
+									if (element_form != NULL) {
+										struct form_args_holder to_post;
+										post_check(element_form, element_form, &to_post);
+										char *action_value = NULL;
+										int method = 1;
+										int i;
+										for (i = 0; i < element_form->properties_length; i++) {
+											if (method && !strcmp(element_form->properties[i]->key, "method")) {
+												method = (strcmp(element_form->properties[i]->value, "POST") != 0);
+											} else if (action_value == NULL && !strcmp(element_form->properties[i]->key, "action")) {
+												action_value = element_form->properties[i]->value;
+											}
+										}
+										if (*action_value == '/') {
+											// Absolute pathing
+											free(path);
+											path = malloc(strlen(action_value) + 1);
+										} else {
+											// Relative pathing
+											*(strrchr(path,'/') + 1) = '\0';
+											path = realloc(path, strlen(path) + strlen(action_value) + 1);
+											strcat(path, action_value);
+										}
+
+										printf("\nMethod: '%s'\n",method ? "GET" : "POST");
+										for (i = 0; i <= to_post.length; i++) {
+											printf("[%d]: '%s'\n", i, to_post.args[i]);
+										}
+										printf("\n");
+										printf("action site: '%s' action path: '%s'\n", site, path);
+										printf("\n");
+										char *dwld_file = curl(site, path, method, to_post.args);
+										char **self_exec = malloc(sizeof(char *) * 6);
+										self_exec[0] = malloc(strlen("./console") + 1);
+										strcpy(self_exec[0], "./console");
+										self_exec[1] = malloc(strlen("--site-with-file") + 1);
+										strcpy(self_exec[1], "--site-with-file");
+										self_exec[2] = site;
+										self_exec[3] = path;
+										self_exec[4] = dwld_file;
+										self_exec[5] = NULL;
+									
+										//execvp(self_exec[0], self_exec);
+										exit(0);
+									}
+								} else if (!stricmp(type_value, "text") || !stricmp(type_value, "password")) {
+									for (i_2 = 0; i_2 < selected->properties_length; i_2++) {
+										//move(i_2,80);
+										//printw("%s",selected->properties[i_2]->key);
+										if (!stricmp(selected->properties[i_2]->key, "value")) {
+											value_value = selected->properties[i_2]->value;
+											break;
+										}
+									}
+									if (value_value == NULL) {
+										i_2 = selected->properties_length;
+										selected->properties = realloc(selected->properties, sizeof(struct key_value_pair *) * (i_2 + 1));
+										selected->properties[i_2] = malloc(sizeof(struct key_value_pair));
+										selected->properties[i_2]->key = malloc(strlen("value") + 1); 
+										strcpy(selected->properties[i_2]->key, "value");
+
+										selected->properties[i_2]->value = malloc(strlen("") + 1); 
+										strcpy(selected->properties[i_2]->value, "");
+										value_value = selected->properties[i_2]->value;
+
+										selected->properties_length++;
+									}
+									value_value = realloc(value_value,512);
+									selected->properties[i_2]->value = value_value;
+									int ch = getch();
+									while (ch != -1 && ch != '\n') {
+										ch = getch();
+									}
+									while (ch != '\n') {
+										move(selected->ly - scroll_y, selected->lx - scroll_x);
+										int i;
+										set_attributes(gen_console_attributes_char(selected));
+										for (i = 0; i < selected->innertext_length; i++) {
+											if (i < strlen(value_value)) {
+												addch(value_value[max(0, strlen(value_value) - selected->innertext_length + 1) + i]);
+											} else {
+												addch(' ');
+											}
+										}
+										move(selected->ly - scroll_y, selected->lx - scroll_x + min(selected->innertext_length - 1,strlen(value_value)));
+										if (0x20 <= ch && ch <= 0x79) {
+											i = strlen(value_value);
+											if (i + 1 < 512) {
+												value_value[i] = (char)ch;
+												value_value[i+1] = '\0';
+											}
+										} else if (ch == 263) {
+											if (strlen(value_value) > 0) {
+												value_value[strlen(value_value) - 1] = '\0';
+											}
+										}
+										ch = getch();
+									}
+								}
+								break;
 							default:
 								break;
 						}
@@ -374,6 +525,9 @@ int main(int argc, char *argv[]) {
 						//printf("innertext: '%s'\n",selected->innertext);
 						//exit(0);
 					} else {
+						move(max_y - 2, 80);
+						attrset(COLOR_PAIR(1));
+						printw("                                    ");  
 						//attrset(COLOR_PAIR(1));
 						//printw("nul");
 					}
@@ -482,13 +636,32 @@ int main(int argc, char *argv[]) {
 				if (is_html) { scrl(-1); }
 				is_not_firstloop = 1;
 			}
+		}		
+		if (is_html) {
+			int i;
+			for (i = 0; i < list_form_inputs_len; i++) {
+				if (IMPORTANT(list_form_inputs[i]->tag)) {
+					struct html_element *cur = list_form_inputs[i];
+					if (cur->lx >= scroll_x && cur->ly >= scroll_y && cur->rx < scroll_x + max_x && cur->ry < scroll_y + max_y) {
+						move(cur->ly - scroll_y, cur->lx - scroll_x);
+						set_attributes(gen_console_attributes_char(cur));
+						int j;
+						for (j = 0; j < cur->properties_length; j++) {
+							if (!strcmp(cur->properties[j]->key, "value")) {
+								printw("%s",cur->properties[j]->value);
+								break;
+							}
+						}
+					}
+				}
+			}
 		}
-		if (ch >= 0) {
-			move(max_y - 1, 120);
-			attrset(COLOR_PAIR(1));
-			printw("ch: %d ^:%d \\/:%d     ",ch,KEY_UP,KEY_DOWN);
+		move(max_y - 1, 80);
+		attrset(COLOR_PAIR(1));
+		if (ch != -1) {
+			printw("ch: %d   ", ch);
 		}
-		
+
 		move(y,x);
 		refresh();		
 	}
@@ -499,6 +672,13 @@ int main(int argc, char *argv[]) {
 	if (is_html) {
 		print_html_structure(html, 1);
 		free_html_element(html);
+
+		printf("list_form_inputs_len: %d\n",list_form_inputs_len);
+		int i;
+		for (i = 0; i < list_form_inputs_len; i++) {
+			printf("list_form_inputs[%d]: %s\n",i,html_element_index_names[list_form_inputs[i]->tag]);
+		}
+
 	} else {
 		printf("max_scroll_x: %d\n", max_scroll_x);
 		printf("max_scroll_y: %d\n", max_scroll_y);
