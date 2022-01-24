@@ -40,26 +40,13 @@ could be used (i tested this with my softdev project as the site, it worked)
 
 #### struct element_properties - holds an element's properties
 - important for css
-- holds element's class, id, style, etc.
+- holds element's class, id, properties, etc.
 
-### Libraries
-- <stdio.h>
-- <string.h>
-- <stdlib.h>
-- <fcntl.h>
-- <unistd.h>
-- <sys/stat.h>
-- <ctype.h>
-- <ncurses.h>
-- <sys/wait.h>
-- <errno.h>
+#### struct key_value pair - used for \[bad\] pseudo-maps
+  holds 2 char *'s
 
-## Timeline
-
-1/14: Setting up curl accessing pages.    
-1/18: Basic rendering of html page (without styling)  
-1/21: Putting output into ncurses window, let user scoll around page.  
-1/24: Styling, html form support.  
+### Nonstandard Libraries
+- ncurses ( <ncurses.h> ) 
 
 ## Instructions
 ### apt-get instructions:
@@ -70,5 +57,8 @@ could be used (i tested this with my softdev project as the site, it worked)
 - run ./console to view what you can do
   - ./console URL will open a web page and download it (do not include https://)
   - ./console -f FILENAME will open a local HTML file
-  - ./console -s SITE PATH will open a web page and download it (do not include https://)
-- once you have a page open, use the left and right arrow keys to move around the screen and the enter key to interact
+  - ./console -s SITE PATH will open a web page and download it
+  
+- once you have a page open, use the up, down, left, and right arrow keys to move around the screen and the enter key to interact.
+- input elements (for forms) have their colors inverted, and pressing enter will let you type until you press enter again
+- submit type input elements work like buttons
