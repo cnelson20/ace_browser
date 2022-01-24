@@ -43,14 +43,23 @@ key-value system created and implemented where applicable
 ericG -- 1/22/22 16:51
 Used new key-value system to make reasonable postcheck without stupid stuff
 
-cameronN -- 1/22/22 
-small touch ups, bug fixes and no memory leaks hopefully
-
 cameronN -- 1/23/22 15:21
 added form support
+
+cameronN -- 1/22/22 17:57
+small touch ups, bug fixes and no memory leaks hopefully
+
+ericG -- 1/23/22 14:07
+Updated devlog to make stuff betterer
+
+adnanQ -- 1/23/22 16;31 
+Readme because we forgot
 
 cameronN -- 1/23/22 23:59
 add support for meta http-equiv = refresh support
 
 cameronN -- 1/24/22 9:57
 fixed refreshing and file checking stuff 
+
+ericG -- 1/24/22 11:36
+"Times are probably important" - eric. Added times to devlog 
