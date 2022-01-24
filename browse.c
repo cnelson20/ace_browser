@@ -686,21 +686,21 @@ char *get_default_innerhtml(struct html_element *elem) {
 char *render_html_file(char *filename, char *output_filename) {
 	struct stat fileinfo;
 
-	printf("---- render_html_file() ----\n");
+	//printf("---- render_html_file() ----\n");
 	if (html) {
 	    free_html_element(html);
 	}
 	
-	printf("---- reading from [downloaded] file ----\n");
+	//printf("---- reading from [downloaded] file ----\n");
 	stat(filename,&fileinfo);
 	int fd = open(filename, O_RDONLY);
 	if (fd == -1) {printf("fuck\n");}
 	file = malloc(fileinfo.st_size+1);
 	read(fd,file,fileinfo.st_size);
 	close(fd);
-	printf("---- done with file ----\n");
+	//printf("---- done with file ----\n");
 
-	printf("---- calling geninquotes_html() ----\n");
+	//printf("---- calling geninquotes_html() ----\n");
 	char *qts = geninquotes_html(file,strlen(file));
 	char *cur = file;
 	
@@ -711,8 +711,8 @@ char *render_html_file(char *filename, char *output_filename) {
 	} 
 	if (is_html) {
 		static_tolowern(strchr(file,'<'),strchr(file,'>') - strchr(file,'<'));
-		printf("Declaration: '%s'\n",static_tolower_string);
-		is_html = memcmp(static_tolower_string,"<!doctype html", strchr(file,'>') - strchr(file,'<')) == 0;
+		//printf("Declaration: '%s'\n",static_tolower_string);
+		is_html = (memcmp(static_tolower_string,"<!doctype html", strchr(file,'>') - strchr(file,'<')) == 0 || memcmp(static_tolower_string,"<html", strchr(file,'>') - strchr(file,'<')) == 0);
 	}
 	if (is_html == 0) {
 		is_html = 0;
@@ -836,7 +836,7 @@ char *render_html_file(char *filename, char *output_filename) {
 			if (!is_whitespace_char(*cur) || (elem->innertext_length != 0 && elem->innertext[elem->innertext_length - 1] != 127 && !is_whitespace_char(*(cur-1)))) {
 				if (*cur == '&' && mystrchrnul(cur,';') < strchr(cur,' ')) {
 					static_tolowern(cur, strchr(cur,';') + 1 - cur);
-					printf("static_tolower_string: '%s'\n", static_tolower_string);
+					//printf("static_tolower_string: '%s'\n", static_tolower_string);
 					int i;
 					for (i = 0; i < html_symbols_len; i++) {
 						if (!strcmp(static_tolower_string, html_symbols[i][0])) {
@@ -878,7 +878,7 @@ char *render_html_file(char *filename, char *output_filename) {
 	test_print_structure(html);
 	printf("\n------------------------\n");
 	
-	printf("---- calling render_page() ----\n");
+	//printf("---- calling render_page() ----\n");
 	render_page(html,html);
 	if (output_filename != NULL) {
     	fd = open(output_filename,O_WRONLY | O_CREAT | O_TRUNC, 0644);

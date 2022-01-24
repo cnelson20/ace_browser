@@ -16,6 +16,8 @@
 extern char html_element_index_names[][16];
 extern size_t html_element_index_names_len;
 
+char *site, *path;
+
 int meta_sleep_pid = 0;
 char *meta_site, *meta_path;
 
@@ -135,6 +137,7 @@ void gen_list_form_inputs(struct html_element *html, int in_form) {
 			  content_value = html->properties[i]->value;
 		  }
 	  }
+	  printf("http_equiv_value: '%s'  content_value: '%s'\n", http_equiv_value, content_value);
 	  if (http_equiv_value != NULL && !stricmp(http_equiv_value, "refresh") && content_value != NULL) {
 		  char *path_temp = strchr(content_value, ';');
 		  *path_temp = '\0';
@@ -143,15 +146,50 @@ void gen_list_form_inputs(struct html_element *html, int in_form) {
 		  strcpy(sleep_args[0], "sleep");
 		  sleep_args[1] = malloc(strlen(content_value) + 1);
 		  strcpy(sleep_args[1], content_value);
-		  *path_temp = ';';
-		  do {
-		      path_temp++;
-		  } while (*path_temp == ' ');
 		  sleep_args[2] = NULL;
 		  meta_sleep_pid = fork();
 		  if (!meta_sleep_pid) {
 			  execvp(sleep_args[0], sleep_args);
 		  }
+		  
+		  *path_temp = ';';
+		  do {
+		      path_temp++;
+		  } while (*path_temp == ' ');
+		  printf("path_temp: '%s'\n", path_temp);
+		  static_tolowern(path_temp, 4);
+		  printf("static_tolower_string: '%s'\n", static_tolower_string);
+		  strcpy(path_temp, (strstr(static_tolower_string,"url=") - static_tolower_string) + strlen("url=") + path_temp);
+		  printf("path_temp: '%s'\n",path_temp);
+		  if (strstr(path_temp, "://")) {
+		    strcpy(path_temp, path_temp + strlen("://"));
+		    char *t = strchr(path_temp, '/');
+		    *t = '\0';
+		    meta_site = malloc(strlen(path_temp) + 1);
+		    strcpy(meta_site, path_temp);
+		    *t = '/';
+		    meta_path = malloc(strlen(t) + 1);
+		    strcpy(meta_path, t);
+		    
+		  } else if (*path_temp == '/') {
+		    // Absolute pathing
+		    meta_site = site;
+		    meta_path = malloc(strlen(path_temp) + 1);
+		    strcpy(meta_path, path_temp);
+		  } else {
+		    // Relative pathing
+		    meta_site = site;
+		    char *nul_temp = strrchr(path,'/') + 1;
+		    char ntemp = *nul_temp;
+		    *nul_temp = '\0';
+		    
+		    meta_path = malloc(strlen(path) + strlen(path_temp) + 1);
+		    strcpy(meta_path, path);
+		    strcat(meta_path, path_temp);
+
+		    *nul_temp = ntemp;
+		  }
+		  printf("meta_site: '%s' meta_path: '%s'\n", meta_site, meta_path);
 	  }
 	}
 	in_form |= (html->tag == ELEMENT_FORM);
@@ -219,7 +257,7 @@ int main(int argc, char *argv[]) {
 	struct stat std;
 	struct unschar_stack *attr_stack;
 	
-	char *temp, *site, *path; 
+	char *temp;
 	int max_x, max_y;
 	int x,y;
 	int scroll_x, scroll_y;
@@ -277,9 +315,9 @@ int main(int argc, char *argv[]) {
 	  exit(1);
 	}
 
-	printf("calling render_html_file()\n");
+	//printf("calling render_html_file()\n");
 	render_html_file(dwld_file, "output.dat");
-	printf("render_html_file() finished\n");
+	//printf("render_html_file() finished\n");
 	
 	if (is_html) {
 		set_dims_x = 0;
@@ -346,6 +384,21 @@ int main(int argc, char *argv[]) {
 	while(1) {
 		int old_scroll_x = scroll_x;
 		int old_scroll_y = scroll_y;
+		int child_status_sleep;
+		if (waitpid(meta_sleep_pid, &child_status_sleep, WNOHANG) > 0) {
+		    endwin();
+		  
+		    /* Sleep Finished */
+		    char **self_args = malloc(5 * sizeof(char *));
+		    self_args[0] = malloc(strlen("./console") + 1);
+		    strcpy(self_args[0], "./console");
+		    self_args[1] = malloc(strlen("-s") + 1);
+		    strcpy(self_args[1], "-s");
+		    self_args[2] = meta_site;
+		    self_args[3] = meta_path;
+		    self_args[4] = NULL;
+		    execvp(self_args[0], self_args);
+		}
 		
 		if (is_not_firstloop) {
 			ch = getch();
