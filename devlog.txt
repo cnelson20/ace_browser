@@ -45,3 +45,9 @@ Used new key-value system to make reasonable postcheck without stupid stuff
 
 cameronN -- 1/22/22 
 small touch ups, bug fixes and no memory leaks hopefully
+
+cameron -- 1/23/22
+added form support
+
+cameronN -- 1/23/22
+add support for meta http-equiv = refresh support
