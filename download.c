@@ -99,7 +99,8 @@ char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **for
 }
 
 struct form_args_holder *post_check(struct html_element * current, struct html_element * form ,struct form_args_holder *gen) {
-	if(current == form) {
+    print_element_path(current);
+    if(current == form) {
 		if (current->num_children != 0 && current->tag == ELEMENT_FORM) {
 			int i;		
 			for (i = 0; i < current->num_children; i++) {
@@ -122,13 +123,12 @@ struct form_args_holder *post_check(struct html_element * current, struct html_e
 			for(int i = 0; i < current->properties_length; i++) {
 				if(!stricmp(current->properties[i]->key,"name")) {
 					tempname = current->properties[i]->value;
-				}
-				if(!stricmp(current->properties[i]->key,"value")) {
+				} else if(!stricmp(current->properties[i]->key,"value")) {
 					tempvalue = current->properties[i]->value;
 				}
 			}
 			if (tempname != NULL) {
-				char *returnstring = malloc(strlen(tempname) + (tempvalue ? strlen(tempvalue) : 0) + 2);
+			    char *returnstring = malloc(strlen(tempname) + (tempvalue ? strlen(tempvalue) : 0) + 2 /*strlen("=") + 1*/);
 				strcpy(returnstring,tempname);
 				strcat(returnstring,"=");
 				if (tempvalue) {

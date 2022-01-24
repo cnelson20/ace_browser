@@ -119,6 +119,8 @@ void gen_list_form_inputs(struct html_element *html, int in_form) {
 	if (in_form && IMPORTANT(html->tag)) {
 		list_form_inputs[list_form_inputs_len++] = html;
 		return;
+	} else if (html->tag == ELEMENT_TITLE) {
+	  printf("%c]0;%s : %s%c", '\033', is_html ? "html_doc" : "txt", html->innertext, '\007');
 	}
 	in_form |= (html->tag == ELEMENT_FORM);
 	int i;
@@ -333,7 +335,7 @@ int main(int argc, char *argv[]) {
 					if (selected != NULL) {
 						move(max_y - 2, 80);
 						attrset(COLOR_PAIR(1));
-						printw("hit!: selected = %s       ",html_element_index_names[selected->tag]);
+						//printw("hit!: selected = %s       ",html_element_index_names[selected->tag]);
 						switch (selected->tag) {
 							case ELEMENT_A:
 								endwin();
@@ -413,13 +415,18 @@ int main(int argc, char *argv[]) {
 								}
 								if (!stricmp(type_value, "submit")) {
 									endwin();
+									printf("Submit!\n");
 									struct html_element *element_form = selected;
 									while (element_form != NULL && element_form->tag != ELEMENT_FORM) {
 										element_form = element_form->parent;
 									}
 									if (element_form != NULL) {
 										struct form_args_holder to_post;
+										to_post.args = malloc(sizeof(char *));
+										to_post.args[0] = NULL;
+										to_post.length = 0;
 										post_check(element_form, element_form, &to_post);
+										printf("after post_check\n");
 										char *action_value = NULL;
 										int method = 1;
 										int i;
@@ -430,6 +437,7 @@ int main(int argc, char *argv[]) {
 												action_value = element_form->properties[i]->value;
 											}
 										}
+										printf("old site: '%s' old path: '%s'\n", site, path);
 										if (*action_value == '/') {
 											// Absolute pathing
 											free(path);
@@ -440,7 +448,6 @@ int main(int argc, char *argv[]) {
 											path = realloc(path, strlen(path) + strlen(action_value) + 1);
 											strcat(path, action_value);
 										}
-
 										printf("\nMethod: '%s'\n",method ? "GET" : "POST");
 										for (i = 0; i <= to_post.length; i++) {
 											printf("[%d]: '%s'\n", i, to_post.args[i]);
@@ -459,8 +466,8 @@ int main(int argc, char *argv[]) {
 										self_exec[4] = dwld_file;
 										self_exec[5] = NULL;
 									
-										//execvp(self_exec[0], self_exec);
-										exit(0);
+										execvp(self_exec[0], self_exec);
+										//exit(0);
 									}
 								} else if (!stricmp(type_value, "text") || !stricmp(type_value, "password")) {
 									for (i_2 = 0; i_2 < selected->properties_length; i_2++) {
@@ -630,7 +637,7 @@ int main(int argc, char *argv[]) {
 				addch('\n');
 			}
 			if (!is_not_firstloop) {
-				if (is_html) { scrl(-1); }
+			  //if (is_html) { scrl(-1); }
 				is_not_firstloop = 1;
 			}
 		}		
