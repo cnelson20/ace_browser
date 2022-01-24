@@ -49,5 +49,5 @@ The user can also just type the url of the page they want to access.
 ### Issues (please be graceful)
 - some pages dont render
 - some pages seg fault (really big pages, specific elements)
-- a lot of elements arent supported (the obvious like video audio img, but also other things
+- a lot of elements arent supported (the obvious like video, audio, images, but also other things
 - in forms, only textarea and text/password inputs work (also required property is ignored)
