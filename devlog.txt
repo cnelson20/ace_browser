@@ -8,17 +8,17 @@ cameronN -- 1/12/22 21:25
 make browse not duplicate newlines (makes "rendered" page look better")
 console scrolling is more efficient
 
-ericG, adnanQ -- 1/14/22 11:34
+ericG, adnanQ -- 1/14/22 11:17
 defined important tags begun work on postcheck
 
 cameronN -- 1/14/22 23:25
 fix some whitespace issues in browse
 working on color in terminal
 
-cameronN -- 1/15/22 9:57 
+cameronN -- 1/15/22 9:56
 fixed memory leaks in browse
 
-cameronN -- 1/15/22 15:45
+cameronN -- 1/15/22 15:59
 combined browse and console into one program
 can search through a page for a element given x and y
 html_element struct has some values for dimensions
@@ -26,28 +26,31 @@ html_element struct has some values for dimensions
 cameronN -- 1/18/22 14:32
 reorganization for readability
 
-cameronN -- 1/19/22 17:42
+cameronN -- 1/19/22 12:30
 colors and attributes along with other readability fixes
 
-cameronN, ericG, adnanQ -- 1/20/22 11:15
+cameronN, ericG, adnanQ -- 1/20/22 11:48
 postcheck work
 links and strchrnul stuff
 
-cameronN, ericG, adnanQ -- 1/21/22 11:44
+cameronN, ericG, adnanQ -- 1/21/22 11:48
 Made a temp post check that works, but is coded horribly
 
-cameronN -- 1/21/22 18:18
+cameronN -- 1/21/22 23:53
 Removed tolower with new system
 key-value system created and implemented where applicable
 
-ericG -- 1/21/22 15:10
+ericG -- 1/22/22 16:51
 Used new key-value system to make reasonable postcheck without stupid stuff
 
 cameronN -- 1/22/22 
 small touch ups, bug fixes and no memory leaks hopefully
 
-cameron -- 1/23/22
+cameronN -- 1/23/22 15:21
 added form support
 
-cameronN -- 1/23/22
+cameronN -- 1/23/22 23:59
 add support for meta http-equiv = refresh support
+
+cameronN -- 1/24/22 9:57
+fixed refreshing and file checking stuff 
