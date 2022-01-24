@@ -711,8 +711,8 @@ char *render_html_file(char *filename, char *output_filename) {
 	} 
 	if (is_html) {
 		static_tolowern(strchr(file,'<'),strchr(file,'>') - strchr(file,'<'));
-		//printf("Declaration: '%s'\n",static_tolower_string);
-		is_html = (memcmp(static_tolower_string,"<!doctype html", strchr(file,'>') - strchr(file,'<')) == 0 || memcmp(static_tolower_string,"<html", strchr(file,'>') - strchr(file,'<')) == 0);
+		printf("Declaration: '%s'\n",static_tolower_string);
+		is_html = (memcmp(static_tolower_string,"<!doctype html", strlen("<!doctype html")) == 0 || memcmp(static_tolower_string,"<html", strchr(file,'>') - strchr(file,'<')) == 0);
 	}
 	if (is_html == 0) {
 		is_html = 0;
