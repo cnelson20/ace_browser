@@ -162,8 +162,8 @@ void gen_list_form_inputs(struct html_element *html, int in_form) {
 		  strcpy(path_temp, (strstr(static_tolower_string,"url=") - static_tolower_string) + strlen("url=") + path_temp);
 		  printf("path_temp: '%s'\n",path_temp);
 		  if (strstr(path_temp, "://")) {
-		    strcpy(path_temp, path_temp + strlen("://"));
-		    char *t = strchr(path_temp, '/');
+		    //strcpy(path_temp, path_temp + strlen("://"));
+		    char *t = strchr(strstr(path_temp,"://") + strlen("://"), '/');
 		    *t = '\0';
 		    meta_site = malloc(strlen(path_temp) + 1);
 		    strcpy(meta_site, path_temp);
