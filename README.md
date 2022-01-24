@@ -46,7 +46,7 @@ The user can also just type the url of the page they want to access.
 - input elements (for forms) have their colors inverted, and pressing enter will let you type until you press enter again
 - submit type input elements work like buttons
 
-### issues
+### Issues (please be graceful)
 - some pages dont render
 - some pages seg fault (really big pages, specific elements)
 - a lot of elements arent supported (the obvious like video audio img, but also other things
