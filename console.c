@@ -434,9 +434,10 @@ int main(int argc, char *argv[]) {
 						break;
 					}
 					selected = search_html_xy(html,scroll_x + x, scroll_y + y /* + 1*/);
+					if (selected == NULL) {
+					  selected = search_html_xy(html, scroll_x + x, scroll_y + y + 1);
+					}
 					if (selected != NULL) {
-						move(max_y - 2, 80);
-						attrset(COLOR_PAIR(1));
 						//printw("hit!: selected = %s       ",html_element_index_names[selected->tag]);
 						char *type_value = NULL;
 						char *value_value = NULL;
