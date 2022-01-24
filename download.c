@@ -122,11 +122,9 @@ struct form_args_holder *post_check(struct html_element * current, struct html_e
 			for(int i = 0; i < current->properties_length; i++) {
 				if(!stricmp(current->properties[i]->key,"name")) {
 					tempname = current->properties[i]->value;
-					break;
 				}
 				if(!stricmp(current->properties[i]->key,"value")) {
 					tempvalue = current->properties[i]->value;
-					break;
 				}
 			}
 			if (tempname != NULL) {

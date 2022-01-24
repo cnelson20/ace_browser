@@ -1,4 +1,4 @@
-#define IMPORTANT(x) (x == ELEMENT_BUTTON || x == ELEMENT_INPUT || x == ELEMENT_TEXTAREA)
+#define IMPORTANT(x) (x == ELEMENT_INPUT || x == ELEMENT_TEXTAREA)
 
 /* Vars */
 extern char curl_strings[][16];
