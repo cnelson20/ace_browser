@@ -12,23 +12,6 @@ The user will be able to move around / scroll the webpage using terminal cursor 
 They can navigate around the web by 'clicking' (actually by pressing enter) on links or by pressing buttons on html forms.  
 The user can also just type the url of the page they want to access.
 
-#### How it will work:
-curl handles downloading html files
-curl, via flags --cookie-jar and --cookie, can write / read cookies from a site.
---output sends the downloaded page to a file, --silent suppresses any output to stdio (good) 
---dump-header stores the http headers from a server's response to a file as well.
-
-For example,
-```
-curl site.com/login --output page.html --cookie-jar cookies.txt -F "username=username" -F "password=password"
-```
-would allow the client to log in while storing necessary cookies.
-To then access, for example, an account settings page (or anywhere else that would require a login) 
-```
-curl site.com/account --output page.html --cookie cookies.txt 
-```
-could be used (i tested this with my softdev project as the site, it worked)
-
 ### Responsibilities:
 - Cameron: HTML && CSS Parsing
 - Adnan: Terminal UI
@@ -62,3 +45,18 @@ could be used (i tested this with my softdev project as the site, it worked)
 - once you have a page open, use the up, down, left, and right arrow keys to move around the screen and the enter key to interact.
 - input elements (for forms) have their colors inverted, and pressing enter will let you type until you press enter again
 - submit type input elements work like buttons
+
+
+### How it works:
+curl handles downloading html files
+curl, via flags --cookie-jar and --cookie, can write / read cookies from a site.
+--output sends the downloaded page to a file, --silent suppresses any output to stdio (good) 
+--dump-header stores the http headers from a server's response to a file as well.
+
+For example,
+```
+curl site.com/login --output page.html --cookie-jar cookies.txt -F "username=username" -F "password=password"
+```
+allows the client to log in while storing necessary cookies.
+To then access, for example, an account settings page (or anywhere else that would require a login) 
+` curl site.com/account --output page.html --cookie cookies.txt ` is usable.
