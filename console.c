@@ -278,6 +278,10 @@ int main(int argc, char *argv[]) {
 	char **lines;
 	char *dwld_file;
 
+	for (i = 0; i < argc; i++) {
+	  printf("argv[%d] = \"%s\"\n", i, argv[i]);
+	}
+	
 	if (argc < 2) {
 		printf("Usage:\n./console URL\n./console -f FILENAME\n./console -s SITE PATH\n");
 		exit(1);
@@ -306,12 +310,12 @@ int main(int argc, char *argv[]) {
 	printf("site: '%s'  path: '%s'\n",site,path);
 	
 	if (strcmp(argv[1],"--site-with-file")) {
-		 if (stricmp(site,"_file")) {
-	    	dwld_file = curl(site,path,1,NULL);
-		} else {
+		if (stricmp(site,"_file") == 0) {
 		    dwld_file = malloc(strlen(path) + 1);
 	    	strcpy(dwld_file,path);
-		}	
+		} else {
+	    	dwld_file = curl(site,path,1,NULL);
+		}
 	}
 	printf("dwld_file: '%s'\n", dwld_file);
 	  
@@ -534,15 +538,18 @@ int main(int argc, char *argv[]) {
 												action_value = element_form->properties[i]->value;
 											}
 										}
+										printf("action_value: '%s'\n", action_value);
 										printf("old site: '%s' old path: '%s'\n", site, path);
 										if (*action_value == '/') {
 											// Absolute pathing
 											free(path);
 											path = malloc(strlen(action_value) + 1);
+											strcpy(path, action_value);
 										} else {
 											// Relative pathing
 											*(strrchr(path,'/') + 1) = '\0';
 											path = realloc(path, strlen(path) + strlen(action_value) + 1);
+										        //printf("path: '%s'\taction_value: '%s'\n", path, action_value);
 											strcat(path, action_value);
 										}
 										printf("\nMethod: '%s'\n",method ? "GET" : "POST");
