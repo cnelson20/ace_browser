@@ -60,6 +60,7 @@ char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **for
 		if (method) {
 			toexec = realloc(toexec,(j+1)*sizeof(char *));
 			toexec[j-1] = curl_strings[2];
+			j++;
 		}
 		for (i = 0; form_data[i]; i++) {
 			toexec = realloc(toexec,(j+2)*sizeof(char *));
