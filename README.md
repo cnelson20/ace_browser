@@ -46,20 +46,8 @@ The user can also just type the url of the page they want to access.
 - input elements (for forms) have their colors inverted, and pressing enter will let you type until you press enter again
 - submit type input elements work like buttons
 
-
-### How it works:
-curl handles downloading html files
-curl, via flags --cookie-jar and --cookie, can write / read cookies from a site.
---output sends the downloaded page to a file, --silent suppresses any output to stdio (good) 
---dump-header stores the http headers from a server's response to a file as well.
-
-For example,
-```
-curl site.com/login --output page.html --cookie-jar cookies.txt -F "username=username" -F "password=password"
-```
-allows the client to log in while storing necessary cookies.
-To then access, for example, an account settings page (or anywhere else that would require a login) 
-```
-curl site.com/account --output page.html --cookie cookies.txt
-``` 
-is usable.
+### Issues (please be graceful)
+- some pages dont render
+- some pages seg fault (really big pages, specific elements)
+- a lot of elements arent supported (the obvious like video, audio, images, but also other things
+- in forms, only textarea and text/password inputs work (also required property is ignored)

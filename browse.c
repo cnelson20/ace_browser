@@ -14,6 +14,8 @@ char html_symbols[][2][8] = {
 	{"&laquo;" , "<<"},
 	{"&lt;" , "<"},
 	{"&gr;" , ">"},
+	{"…" , "..."},
+	{"’" , "'"},
 };
 size_t html_symbols_len = sizeof(html_symbols) / sizeof(html_symbols[0]);
 

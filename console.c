@@ -16,6 +16,7 @@
 extern char html_element_index_names[][16];
 extern size_t html_element_index_names_len;
 
+char text_text[] = "text";
 char *site, *path;
 
 int meta_sleep_pid = 0;
@@ -59,13 +60,17 @@ void init_colors() {
 	Ex: get_site_path_from_url("google.com/search") => "google.com" , "/search"
 */
 void get_site_path_from_url(char *link, char **site, char **path) {
-	if (strchr(link,'/')) {
-	  *path = malloc(strlen(strchr(link,'/')) + 1);
-	  strcpy(*path,strchr(link,'/'));
-	  *strchr(link,'/') = '\0';
+    char *cur_link = link;
+	if (strstr(link,"://")) {
+	  cur_link = strstr(link,"://") + strlen("://");
+	}
+	if (strchr(cur_link,'/')) {
+	  *path = malloc(strlen(strchr(cur_link,'/')) + 1);
+	  strcpy(*path,strchr(cur_link,'/'));
+	  *strchr(cur_link,'/') = '\0';
 	  *site = malloc(strlen(link) + 1);
 	  strcpy(*site,link);
-	  *strchr(link,'\0') = '/';
+	  *strchr(cur_link,'\0') = '/';
 	} else {
 	  *path = malloc(strlen("/") + 1);
 	  strcpy(*path,"/");
@@ -433,10 +438,14 @@ int main(int argc, char *argv[]) {
 						break;
 					}
 					selected = search_html_xy(html,scroll_x + x, scroll_y + y /* + 1*/);
+					if (selected == NULL) {
+					  selected = search_html_xy(html, scroll_x + x, scroll_y + y + 1);
+					}
 					if (selected != NULL) {
-						move(max_y - 2, 80);
-						attrset(COLOR_PAIR(1));
 						//printw("hit!: selected = %s       ",html_element_index_names[selected->tag]);
+						char *type_value = NULL;
+						char *value_value = NULL;
+						int i_2;
 						switch (selected->tag) {
 							case ELEMENT_A:
 								endwin();
@@ -504,17 +513,22 @@ int main(int argc, char *argv[]) {
 								break;
 							case ELEMENT_TEXTAREA:
 							case ELEMENT_INPUT:
-								;
-								char *type_value = NULL;
-								char *value_value = NULL;
-								int i_2;
-								for (i_2 = 0; i_2 < selected->properties_length; i_2++) {
-									if (!stricmp(selected->properties[i_2]->key, "type")) {
-										type_value = selected->properties[i_2]->value;
-										break;
-									}
-								}
-								if (!stricmp(type_value, "submit")) {
+							   /*
+								 char *type_value = NULL;
+								 char *value_value = NULL;
+								 int i_2;
+							   */
+							   if (selected->tag == ELEMENT_INPUT) {
+								   for (i_2 = 0; i_2 < selected->properties_length; i_2++) {
+									   if (!stricmp(selected->properties[i_2]->key, "type")) {
+										 type_value = selected->properties[i_2]->value;
+										 break;
+									   }
+								   }
+							   } else {
+								 type_value = text_text;
+							   }
+							   if (!stricmp(type_value, "submit")) {
 									endwin();
 									printf("Submit!\n");
 									struct html_element *element_form = selected;
