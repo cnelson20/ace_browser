@@ -196,7 +196,7 @@ size_t strip_whitespace_inplace(char *s);
 void tolower_inplace(char *t);
 char *mystrchrnul(const char *s, int c);
 
-char static_tolower_string[100];
+extern char static_tolower_string[100];
 char *static_tolowern(char *string, size_t n);
 char *static_tolower(char *string);
 
