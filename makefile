@@ -1,7 +1,7 @@
 all: console
 
 console: console.o browse.o download.o
-	gcc console.o browse.o download.o -o console -lncurses
+	gcc console.o browse.o download.o -o ace -lncurses
 
 console.o: console.c browse.h
 	gcc -c console.c
