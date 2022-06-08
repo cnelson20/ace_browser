@@ -68,14 +68,11 @@ void get_site_path_from_url(char *link, char **site, char **path) {
 	  *path = malloc(strlen(strchr(cur_link,'/')) + 1);
 	  strcpy(*path,strchr(cur_link,'/'));
 	  *strchr(cur_link,'/') = '\0';
-	  *site = malloc(strlen(link) + 1);
-	  strcpy(*site,link);
+	  *site = strdup(link);
 	  *strchr(cur_link,'\0') = '/';
 	} else {
-	  *path = malloc(strlen("/") + 1);
-	  strcpy(*path,"/");
-	  *site = malloc(strlen(link) + 1);
-	  strcpy(*site,link);
+	  *path = strdup("/");
+	  *site = strdup(link);
 	}
    
 }
@@ -292,22 +289,15 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	if (!strcmp(argv[1],"-f")) {
-	    site = malloc(strlen("_file") + 1);
-	    strcpy(site,"_file");
-	    path = malloc(strlen(argv[2]) + 1);
-	    strcpy(path,argv[2]);
+	    site = strdup("_file");
+	    path = strdup(argv[2]);
 	} else if (!strcmp(argv[1],"-s")) {
- 	    site = malloc(strlen(argv[2]) + 1);
-	    strcpy(site,argv[2]);
-	    path = malloc(strlen(argv[3]) + 1);
-	    strcpy(path,argv[3]);	    
+ 	    site = strdup(argv[2]);
+	    path = strdup(argv[3]);	    
 	} else if (!strcmp(argv[1],"--site-with-file")) {
-		site = malloc(strlen(argv[2]) + 1);
-	    strcpy(site,argv[2]);
-	    path = malloc(strlen(argv[3]) + 1);
-	    strcpy(path,argv[3]);
-		dwld_file = malloc(strlen(argv[4]) + 1);
-	    strcpy(dwld_file, argv[4]);
+		site =strdup(argv[2]);
+	    path = strdup(argv[3]);
+		dwld_file = strdup(argv[4]);
 	} else {
 	    /* Download file */
 	    get_site_path_from_url(argv[1],&site,&path);
@@ -316,8 +306,7 @@ int main(int argc, char *argv[]) {
 	
 	if (strcmp(argv[1],"--site-with-file")) {
 		if (stricmp(site,"_file") == 0) {
-		    dwld_file = malloc(strlen(path) + 1);
-	    	strcpy(dwld_file,path);
+		    dwld_file = strdup(path);
 		} else {
 	    	dwld_file = curl(site,path,1,NULL);
 		}
@@ -427,7 +416,46 @@ int main(int argc, char *argv[]) {
 			ch = 0;
 		}
 		if (ch >= 0x20 && ch < 0x7F) {
-			if (1) {
+			if (ch == 'S' || ch == 's' || ch == 'N' || ch == 'n') {
+				char typeflag = tolower(ch);
+				char querypath[256] = "";
+				int query_length = 0;
+				while ((ch = getch()) != '\n') {
+					if (ch >= 0x20 && ch <= 0x79 && query_length < 256) {
+						querypath[query_length] = ch;
+						query_length++;
+						querypath[query_length] = '\0';
+					} else if (ch == 263 || ch == 127 && query_length > 0) {
+						query_length--;
+						querypath[query_length] = '\0';
+					}
+					move((max_y - 1), 0);
+					attrset(COLOR_PAIR(8));
+					//printw("%d ", max_y);
+					printw("%s: %-40s", typeflag == 's' ? "URL" : "Path",querypath);
+					refresh();
+				}
+				endwin();
+				if (strstr(querypath, "://") || typeflag == 's') {
+					free(site);
+					free(path);
+					get_site_path_from_url(querypath, &site, &path);
+				} else if (querypath[0] == '/') {
+					path = strdup(querypath);
+				} else if (querypath[0] != '\0') {
+					*(strrchr(path, '/') + 1) = '\0';
+					path = realloc(path, strlen(path) + strlen(querypath));
+					strcat(path, querypath);
+				}
+				printw("Site: %s Path: %s", site, path);
+				char **toexec = malloc(5 * sizeof(char *));
+				toexec[0] = strdup("./console");
+				toexec[1] = strdup("-s");
+				toexec[2] = site;
+				toexec[3] = path;
+				toexec[4] = NULL;
+				execvp(toexec[0], toexec);
+			} else if (1) {
 				break;
 			}
 		} else {
@@ -633,8 +661,8 @@ int main(int argc, char *argv[]) {
 												value_value[i] = (char)ch;
 												value_value[i+1] = '\0';
 											}
-										} else if (ch == 263) {
-											if (strlen(value_value) > 0) {
+										} else if (ch == 263 || ch == 127) {
+											if (*value_value != '\0' /* check if strlen != 0 */) {
 												value_value[strlen(value_value) - 1] = '\0';
 											}
 										}

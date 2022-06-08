@@ -29,7 +29,9 @@ char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **for
 	strcat(fullname,path);
 
 	char *filename_tosave;
-	if (strrchr(path,'/') == strchr(path,'\0') - 1) {
+	if (!strcmp(path, "")) {
+		filename_tosave = strdup("files/index.html");
+	} else if (strrchr(path,'/') == strchr(path,'\0') - 1) {
 		filename_tosave = malloc(strlen("files") + strlen(path) + strlen("index.html") + 1);
 		strcpy(filename_tosave,"files");
 		strcat(filename_tosave,path);
@@ -40,6 +42,7 @@ char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **for
 		strcat(filename_tosave,path);
 	}
 
+	printf("fullname: %s\n",fullname);
 	printf("filename_tosave: '%s'\n",filename_tosave);
 	
 	char **toexec = malloc(11*sizeof(char *));

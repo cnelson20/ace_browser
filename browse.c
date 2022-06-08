@@ -12,6 +12,7 @@ char html_symbols[][2][8] = {
 	{"&emsp;" , "    "},
 	{"&raquo;" , ">>"},
 	{"&laquo;" , "<<"},
+	{"&#8212;" , "--"},
 	{"&lt;" , "<"},
 	{"&gr;" , ">"},
 	{"…" , "..."},
@@ -676,6 +677,10 @@ char *get_default_innerhtml(struct html_element *elem) {
 					} else if (!stricmp(name_value, "hidden")) {
 						return (char *)"";
 					}
+					/* default to text element */
+					free(elem->properties[i]->value);
+					elem->properties[i]->value = strdup("text");
+					return (char *)"            ";
 					return "~~INPUT~~";
 				}
 			}
