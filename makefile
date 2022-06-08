@@ -1,7 +1,7 @@
-all: ace
+all: console
 
-ace: console.o browse.o download.o
-	gcc console.o browse.o download.o -o ace -lncurses
+console: console.o browse.o download.o
+	gcc console.o browse.o download.o -o console -lncurses
 
 console.o: console.c browse.h
 	gcc -c console.c
@@ -15,4 +15,5 @@ download.o: download.c
 clean:
 	-rm *.o
 	-rm *~
+	-rm -rf files/
 

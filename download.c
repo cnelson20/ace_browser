@@ -26,13 +26,9 @@ char curl_strings[][16] = {
 char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **form_data) {
 	char *fullname = malloc(strlen(site) + strlen(path) + 1);
 	strcpy(fullname,site);
-	if (*path == '\0') { /* if path = "" */
-		path = "/";
-	}
 	strcat(fullname,path);
 
 	char *filename_tosave;
-	/* if page is the root of a directory */
 	if (strrchr(path,'/') == strchr(path,'\0') - 1) {
 		filename_tosave = malloc(strlen("files") + strlen(path) + strlen("index.html") + 1);
 		strcpy(filename_tosave,"files");
@@ -47,7 +43,6 @@ char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **for
 	printf("filename_tosave: '%s'\n",filename_tosave);
 	
 	char **toexec = malloc(11*sizeof(char *));
-	/* Default curl arguments */
 	toexec[0] = curl_strings[0]; // curl
 	toexec[1] = fullname; // site.com/file.html
 	toexec[2] = curl_strings[3]; // -o
