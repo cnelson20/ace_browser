@@ -148,8 +148,9 @@ void gen_list_form_inputs(struct html_element *html, int in_form) {
 			meta_sleep_pid = fork();
 			printf("Forked! content_value: \"%s\"\n", content_value);
 			if (!meta_sleep_pid) {
-				printf("'%s'\n", content_value);
+				printf("b4");
 				sleep(atoi(content_value));
+				printf("after");
 				exit(0);
 			}
 			
@@ -284,6 +285,7 @@ int main(int argc, char *argv[]) {
 	char **lines;
 	char *dwld_file;
 
+	printf("argv: Array(%d)\n", argc);
 	for (i = 0; i < argc; i++) {
 	  printf("argv[%d] = \"%s\"\n", i, argv[i]);
 	}
@@ -299,7 +301,7 @@ int main(int argc, char *argv[]) {
  	    site = strdup(argv[2]);
 	    path = strdup(argv[3]);	    
 	} else if (!strcmp(argv[1],"--site-with-file")) {
-		site =strdup(argv[2]);
+		site = strdup(argv[2]);
 	    path = strdup(argv[3]);
 		dwld_file = strdup(argv[4]);
 	} else {
@@ -312,7 +314,7 @@ int main(int argc, char *argv[]) {
 		if (stricmp(site,"_file") == 0) {
 		    dwld_file = strdup(path);
 		} else {
-	    	dwld_file = curl(site,path,1,NULL);
+	    	dwld_file = curl(site,&path,1,NULL);
 		}
 	}
 	printf("dwld_file: '%s'\n", dwld_file);
@@ -403,15 +405,17 @@ int main(int argc, char *argv[]) {
 		    endwin();
 		  
 		    /* Sleep Finished */
-		    char **self_args = malloc(5 * sizeof(char *));
-		    self_args[0] = malloc(strlen("./console") + 1);
-		    strcpy(self_args[0], "./console");
-		    self_args[1] = malloc(strlen("-s") + 1);
-		    strcpy(self_args[1], "-s");
+		    char **self_args = malloc(6 * sizeof(char *));
+		    self_args[0] = "./console";
+		    //self_args[1] = strdup("--site-with-file");
+			self_args[1] = "-s";
 		    self_args[2] = meta_site;
 		    self_args[3] = meta_path;
-		    self_args[4] = NULL;
+		    //self_args[4] = dwld_file;
+			self_args[4] = NULL;
 		    execvp(self_args[0], self_args);
+			printf("Error: %s\n", strerror(errno));
+			exit(0);
 		}
 		
 		if (is_not_firstloop) {
@@ -453,12 +457,14 @@ int main(int argc, char *argv[]) {
 				}
 				printw("Site: %s Path: %s", site, path);
 				char **toexec = malloc(5 * sizeof(char *));
-				toexec[0] = strdup("./console");
-				toexec[1] = strdup("-s");
+				toexec[0] = "./console";
+				toexec[1] = "-s";
 				toexec[2] = site;
 				toexec[3] = path;
 				toexec[4] = NULL;
 				execvp(toexec[0], toexec);
+				printf("Error: %s\n", strerror(errno));
+				exit(0);
 			} else if (1) {
 				break;
 			}
@@ -534,14 +540,14 @@ int main(int argc, char *argv[]) {
 									}
 								}
 								printf("new site: '%s' new path: '%s'\n",site,path);
-								self_exec[0] = malloc(strlen("./console") + 1);
-								strcpy(self_exec[0], "./console");
-								self_exec[1] = malloc(strlen("-s") + 1);
-								strcpy(self_exec[1], "-s");
+								self_exec[0] = "./console";
+								self_exec[1] = "-s";
 								self_exec[2] = site;
 								self_exec[3] = path;
 								self_exec[4] = NULL;
 								execvp(self_exec[0], self_exec);
+								printf("Error: %s\n", strerror(errno));
+								exit(0);
 								break;
 							case ELEMENT_TEXTAREA:
 							case ELEMENT_INPUT:
@@ -605,19 +611,18 @@ int main(int argc, char *argv[]) {
 										printf("\n");
 										printf("action site: '%s' action path: '%s'\n", site, path);
 										printf("\n");
-										char *dwld_file = curl(site, path, method, to_post.args);
-										char **self_exec = malloc(sizeof(char *) * 6);
-										self_exec[0] = malloc(strlen("./console") + 1);
-										strcpy(self_exec[0], "./console");
-										self_exec[1] = malloc(strlen("--site-with-file") + 1);
-										strcpy(self_exec[1], "--site-with-file");
+										char *dwld_file = curl(site, &path, method, to_post.args);
+										char **self_exec = malloc(5 * sizeof(char *));
+										self_exec[0] = "./console";
+										self_exec[1] = "-s";
 										self_exec[2] = site;
 										self_exec[3] = path;
-										self_exec[4] = dwld_file;
-										self_exec[5] = NULL;
+										//self_exec[4] = dwld_file;
+										self_exec[4] = NULL;
 									
 										execvp(self_exec[0], self_exec);
-										//exit(0);
+										printf("Error: %s\n", strerror(errno));
+										exit(0);
 									}
 								} else if (!stricmp(type_value, "text") || !stricmp(type_value, "password")) {
 									for (i_2 = 0; i_2 < selected->properties_length; i_2++) {

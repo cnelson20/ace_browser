@@ -23,23 +23,31 @@ char curl_strings[][16] = {
 	/* 8 */ "-s"
 	};
 
-char *curl(char *site, char *path, int method /* 1 = get, 0 = post*/, char **form_data) {
-	char *fullname = malloc(strlen(site) + strlen(path) + 1);
+char *curl(char *site, char **path, int method /* 1 = get, 0 = post*/, char **form_data) {
+	char *fullname = malloc(strlen(site) + strlen(*path) + 1);
 	strcpy(fullname,site);
-	strcat(fullname,path);
+	strcat(fullname,*path);
 
 	char *filename_tosave;
-	if (!strcmp(path, "")) {
+	if (!strcmp(*path, "")) {
 		filename_tosave = strdup("files/index.html");
-	} else if (strrchr(path,'/') == strchr(path,'\0') - 1) {
-		filename_tosave = malloc(strlen("files") + strlen(path) + strlen("index.html") + 1);
+	} else if (strrchr(*path,'/') == strchr(*path,'\0') - 1) {
+		filename_tosave = malloc(strlen("files") + strlen(*path) + strlen("index.html") + 1);
 		strcpy(filename_tosave,"files");
-		strcat(filename_tosave,path);
+		strcat(filename_tosave,*path);
 		strcat(filename_tosave,"index.html");
 	} else {
-		filename_tosave = malloc(strlen("files") + strlen(path) + 1);
+		filename_tosave = malloc(strlen("files") + strlen(*path) + 1);
 		strcpy(filename_tosave,"files");
-		strcat(filename_tosave,path);
+		strcat(filename_tosave,*path);
+	}
+	char *temp = strchr(filename_tosave,'?');
+	if (temp != NULL) {
+		*temp = '\0';
+		filename_tosave = realloc(filename_tosave, temp - filename_tosave + 1);
+		temp = strchr(*path, '?');
+		*temp = '\0';
+		*path = realloc(*path, temp - *path + 1);
 	}
 
 	printf("fullname: %s\n",fullname);
