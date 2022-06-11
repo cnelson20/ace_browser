@@ -146,7 +146,7 @@ void gen_list_form_inputs(struct html_element *html, int in_form) {
 			char *path_temp = strchr(content_value, ';');
 			if (path_temp != NULL) {*path_temp = '\0';}
 			meta_sleep_pid = fork();
-			printf("Forked! content_value: \"%s\"\n");
+			printf("Forked! content_value: \"%s\"\n", content_value);
 			if (!meta_sleep_pid) {
 				printf("'%s'\n", content_value);
 				sleep(atoi(content_value));
