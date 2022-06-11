@@ -129,82 +129,80 @@ void gen_list_form_inputs(struct html_element *html, int in_form) {
 	} else if (html->tag == ELEMENT_TITLE) {
 	  printf("%c]0;%s : %s%c", '\033', is_html ? "html_doc" : "txt", html->innertext, '\007');
 	} else if (html->tag == ELEMENT_META) {
-	  int i;
-	  char *http_equiv_value = NULL;
-	  char *content_value = NULL;
-	  for (i = 0; i < html->properties_length; i++) {
-		  if (!strcmp(html->properties[i]->key, "http-equiv")) {
-			  http_equiv_value = html->properties[i]->value;
-		  } else if (!strcmp(html->properties[i]->key, "content")) {
-			  content_value = html->properties[i]->value;
-		  }
-	  }
-	  printf("http_equiv_value: '%s'  content_value: '%s'\n", http_equiv_value, content_value);
-	  if (http_equiv_value != NULL && !stricmp(http_equiv_value, "refresh") && content_value != NULL) {
-		  char *path_temp = strchr(content_value, ';');
-		  *path_temp = '\0';
-		  char **sleep_args = malloc(3 * sizeof(char *));
-		  sleep_args[0] = malloc(strlen("sleep") + 1);
-		  strcpy(sleep_args[0], "sleep");
-		  sleep_args[1] = malloc(strlen(content_value) + 1);
-		  strcpy(sleep_args[1], content_value);
-		  sleep_args[2] = NULL;
-		  meta_sleep_pid = fork();
-		  if (!meta_sleep_pid) {
-			  execvp(sleep_args[0], sleep_args);
-		  }
-		  
-		  *path_temp = ';';
-		  do {
-		      path_temp++;
-		  } while (*path_temp == ' ');
-		  printf("path_temp with URL=: '%s'\n", path_temp);
-		  static_tolowern(path_temp, 4);
-		  printf("static_tolower_string: '%s'\n", static_tolower_string);
-		  char *path_temp_quote = (strstr(static_tolower_string,"url=") - static_tolower_string) + strlen("url=") + path_temp; 
-		  char path_temp_quote_type = *path_temp_quote;
-		  if (path_temp_quote_type == '"' || path_temp_quote_type == '\'') {
-			  path_temp_quote++;
-		  } else {
-			  path_temp_quote_type = '\0';
-		  }
-		  int path_temp_i = 0;
-		  while (*path_temp_quote && *path_temp_quote != path_temp_quote_type) {
-			  path_temp[path_temp_i++] = *(path_temp_quote++);
-		  }
-		  path_temp[path_temp_i] = '\0';
-		  
-		  printf("path_temp: '%s'\n",path_temp);
-		  if (strstr(path_temp, "://")) {
-		    //strcpy(path_temp, path_temp + strlen("://"));
-		    char *t = strchr(strstr(path_temp,"://") + strlen("://"), '/');
-		    *t = '\0';
-		    meta_site = malloc(strlen(path_temp) + 1);
-		    strcpy(meta_site, path_temp);
-		    *t = '/';
-		    meta_path = malloc(strlen(t) + 1);
-		    strcpy(meta_path, t);
-		    
-		  } else if (*path_temp == '/') {
-		    // Absolute pathing
-		    meta_site = site;
-		    meta_path = malloc(strlen(path_temp) + 1);
-		    strcpy(meta_path, path_temp);
-		  } else {
-		    // Relative pathing
-		    meta_site = site;
-		    char *nul_temp = strrchr(path,'/') + 1;
-		    char ntemp = *nul_temp;
-		    *nul_temp = '\0';
-		    
-		    meta_path = malloc(strlen(path) + strlen(path_temp) + 1);
-		    strcpy(meta_path, path);
-		    strcat(meta_path, path_temp);
+	  	int i;
+		char *http_equiv_value = NULL;
+		char *content_value = NULL;
+		for (i = 0; i < html->properties_length; i++) {
+			if (!strcmp(html->properties[i]->key, "http-equiv")) {
+				http_equiv_value = html->properties[i]->value;
+			} else if (!strcmp(html->properties[i]->key, "content")) {
+				content_value = html->properties[i]->value;
+			}
+		}
+		printf("http_equiv_value: '%s'  content_value: '%s'\n", http_equiv_value, content_value);
+		if (http_equiv_value != NULL && !stricmp(http_equiv_value, "refresh") && content_value != NULL) {
+			/* Seg fault here: */
+			char *path_temp = strchr(content_value, ';');
+			if (path_temp != NULL) {*path_temp = '\0';}
+			meta_sleep_pid = fork();
+			printf("Forked! content_value: \n");
+			if (!meta_sleep_pid) {
+				printf("'%s'\n", content_value);
+				sleep(atoi(content_value));
+				exit(0);
+			}
+			
+			*path_temp = ';';
+			do {
+				path_temp++;
+			} while (*path_temp == ' ');
+			printf("path_temp with URL=: '%s'\n", path_temp);
+			static_tolowern(path_temp, 4);
+			printf("static_tolower_string: '%s'\n", static_tolower_string);
+			char *path_temp_quote = (strstr(static_tolower_string,"url=") - static_tolower_string) + strlen("url=") + path_temp; 
+			char path_temp_quote_type = *path_temp_quote;
+			if (path_temp_quote_type == '"' || path_temp_quote_type == '\'') {
+				path_temp_quote++;
+			} else {
+				path_temp_quote_type = '\0';
+			}
+			int path_temp_i = 0;
+			while (*path_temp_quote && *path_temp_quote != path_temp_quote_type) {
+				path_temp[path_temp_i++] = *(path_temp_quote++);
+			}
+			path_temp[path_temp_i] = '\0';
+			
+			printf("path_temp: '%s'\n",path_temp);
+			if (strstr(path_temp, "://")) {
+				//strcpy(path_temp, path_temp + strlen("://"));
+				char *t = strchr(strstr(path_temp,"://") + strlen("://"), '/');
+				*t = '\0';
+				meta_site = malloc(strlen(path_temp) + 1);
+				strcpy(meta_site, path_temp);
+				*t = '/';
+				meta_path = malloc(strlen(t) + 1);
+				strcpy(meta_path, t);
+				
+			} else if (*path_temp == '/') {
+				// Absolute pathing
+				meta_site = site;
+				meta_path = malloc(strlen(path_temp) + 1);
+				strcpy(meta_path, path_temp);
+			} else {
+				// Relative pathing
+				meta_site = site;
+				char *nul_temp = strrchr(path,'/') + 1;
+				char ntemp = *nul_temp;
+				*nul_temp = '\0';
+				
+				meta_path = malloc(strlen(path) + strlen(path_temp) + 1);
+				strcpy(meta_path, path);
+				strcat(meta_path, path_temp);
 
-		    *nul_temp = ntemp;
-		  }
-		  printf("meta_site: '%s' meta_path: '%s'\n", meta_site, meta_path);
-	  }
+				*nul_temp = ntemp;
+			}
+			printf("meta_site: '%s' meta_path: '%s'\n", meta_site, meta_path);
+	  	}
 	}
 	in_form |= (html->tag == ELEMENT_FORM);
 	int i;
